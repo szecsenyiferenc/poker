@@ -8,11 +8,11 @@ namespace Poker.Shared.Models.PokerModels
 {
     public class Table
     {
-        public List<Player> Players { get; private set; }
+        public List<PokerUser> PokerUsers { get; private set; }
         public Game Game { get; private set; }
 
         public int Id { get; set; }
-        public int PlayerNumber { get => Players.Count; }
+        public int PlayerNumber { get => PokerUsers.Count; }
         public int MaxNumber { get; set; }
         public string Name { get; set; }
 
@@ -20,24 +20,24 @@ namespace Poker.Shared.Models.PokerModels
         {
             Id = id;
             Name = name;
-            Players = new List<Player>();
+            PokerUsers = new List<PokerUser>();
             MaxNumber = 6;
         }
 
-        public bool AddPlayer(Player player)
+        public bool AddPlayer(PokerUser player)
         {
-            if (Players.Count == 6)
+            if (PokerUsers.Count == 6)
             {
                 return false;
             }
 
-            Players.Add(player);
+            PokerUsers.Add(player);
             return true;
         }
 
         public async Task Next()
         {
-            Game = new Game(Players);
+            Game = new Game(PokerUsers);
             await Game.Next();
         }
 

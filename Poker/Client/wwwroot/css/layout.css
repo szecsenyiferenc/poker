@@ -72,6 +72,18 @@
     overflow-y: auto;
 }
 
+.table-overlay {
+    z-index: 2;
+    position: absolute;
+    background-color: rgba(77, 77, 77, 0.5);
+    height: 100%;
+    width: 100%;
+    display: flex;
+    flex-flow: column nowrap;
+    justify-content: center;
+    align-items: center;
+}
+
 .poker-container {
     background-color: green;
     width: 100%;

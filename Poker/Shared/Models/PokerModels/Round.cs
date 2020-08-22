@@ -1,4 +1,5 @@
 ﻿using Poker.Shared.Enums;
+using Poker.Shared.Models.DomainModels;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -8,10 +9,10 @@ namespace Poker.Shared.Models.PokerModels
 {
     public class Round
     {
-        public List<Player> Players { get; private set; }
+        public List<PokerUser> Players { get; private set; }
         public RoundType RoundType { get; private set; }
 
-        public Round(List<Player> players, RoundType roundType)
+        public Round(List<PokerUser> players, RoundType roundType)
         {
             Players = players;
             RoundType = roundType;

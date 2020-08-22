@@ -51,10 +51,29 @@ namespace Poker.Server.Hubs
             await Clients.Caller.SendAsync("GetTables", _tableProvider.GetAllTableViews());
         }
 
-        //public async Task InitConnectionWithAll()
-        //{
 
-        //}
+        public async Task AddTable()
+        {
+            _tableProvider.IncrementTables();
+            await Clients.All.SendAsync("GetTables", _tableProvider.GetAllTableViews());
+        }
+
+        public async Task GetTables()
+        {
+            await Clients.Caller.SendAsync("GetTables", _tableProvider.GetAllTableViews());
+        }
+
+        public async Task JoinToTable(int tableId, PokerUser pokerUser)
+        {
+            _tableProvider.JoinToTable(tableId, pokerUser);
+            await Clients.All.SendAsync("GetTables", _tableProvider.GetAllTableViews());
+        }
+
+        public async Task LeaveTable(int tableId, PokerUser pokerUser)
+        {
+            _tableProvider.LeaveTable(tableId, pokerUser);
+            await Clients.All.SendAsync("GetTables", _tableProvider.GetAllTableViews());
+        }
 
 
 
@@ -67,9 +86,9 @@ namespace Poker.Server.Hubs
         {
             var currentUser = GetCurrentUser();
 
-            await InitConnectionWithClient();
+            // await InitConnectionWithClient();
 
-            Debug.WriteLine("SignalR - connected " + currentUser?.Username);
+            Console.WriteLine("SignalR - connected " + currentUser?.Username);
 
             await base.OnConnectedAsync();
         }
@@ -78,7 +97,7 @@ namespace Poker.Server.Hubs
         {
             var currentUser = GetCurrentUser();
 
-            Debug.WriteLine("SignalR - disconnect " + currentUser?.Username);
+            Console.WriteLine("SignalR - disconnect " + currentUser?.Username);
 
             await base.OnDisconnectedAsync(exception);
         }

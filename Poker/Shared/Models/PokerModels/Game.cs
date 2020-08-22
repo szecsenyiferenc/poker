@@ -12,20 +12,20 @@ namespace Poker.Shared.Models.DomainModels
     {
         private int _turnState;
 
-        public List<Player> Players { get; private set; }
+        public List<PokerUser> PokerUsers { get; private set; }
         public Round Round { get; private set; }
 
-        public Game(List<Player> players)
+        public Game(List<PokerUser> players)
         {
             _turnState = 0;
-            Players = players.ToList();
+            PokerUsers = players.ToList();
         }
 
         public async Task Next()
         {
             while (Round.RoundType != RoundType.End)
             {
-                Round = new Round(Players, (RoundType)_turnState);
+                Round = new Round(PokerUsers, (RoundType)_turnState);
                 await Round.Next();
             }
         }

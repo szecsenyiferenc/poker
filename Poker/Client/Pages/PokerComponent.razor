@@ -6,9 +6,16 @@
     <NavigationBarComponent PokerUser="@PokerUser" LogoutClick="@Logout"></NavigationBarComponent>
     <div class="main-container">
         <div class="table-container">
+            @if (SelectedTable != null)
+            {
+                <div class="table-overlay">
+                    <div>Selected Table: @SelectedTable.Name</div>
+                    <div class="poker-button noselect" @onclick="@(() => LeaveTable(SelectedTable))">Leave</div>
+                </div>
+            }
             @foreach (var table in _tables)
             {
-                <TableComponent Table="@table"></TableComponent>
+                <TableComponent Table="@table" OnClick="@(() => JoinToTable(table))"></TableComponent>
             }
             <NewTableComponent OnClick="@AddTable"></NewTableComponent>
         </div>

@@ -1,4 +1,4 @@
-﻿<div class="poker-table noselect">
+﻿<div class="poker-table noselect" @onclick="TableClicked">
     <div class="poker-table-header poker-table-text">@Table.Name</div>
     <div class="poker-table-text">@Table.MaxNumber/@Table.PlayerNumber</div>
 </div>
@@ -6,5 +6,13 @@
 @code {
     [Parameter]
     public Poker.Shared.Models.ViewModels.TableViewModel Table { get; set; }
+
+    [Parameter]
+    public EventCallback OnClick { get; set; }
+
+    public async Task TableClicked()
+    {
+        await OnClick.InvokeAsync(null);
+    }
 
 }

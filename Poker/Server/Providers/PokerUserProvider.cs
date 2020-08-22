@@ -23,7 +23,7 @@ namespace Poker.Server.Providers
             var result = _currentUsers.TryAdd(guid, pokerUser);
             if (result)
             {
-                Debug.WriteLine($"Logged in - {guid} - {pokerUser?.Username}");
+                Console.WriteLine($"Logged in - {guid} - {pokerUser?.Username}");
                 return guid;
             }
             return null;
@@ -44,7 +44,7 @@ namespace Poker.Server.Providers
         public void Remove(string id)
         {
             _currentUsers.TryRemove(id, out PokerUser pokerUser);
-            Debug.WriteLine($"Logged out - {id} - {pokerUser.Username}");
+            Console.WriteLine($"Logged out - {id} - {pokerUser.Username}");
         }
 
         public List<PokerUser> GetAllUsers()

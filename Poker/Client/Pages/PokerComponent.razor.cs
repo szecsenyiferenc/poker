@@ -17,6 +17,8 @@ namespace Poker.Client.Pages
         private string PlayerName { get; set; }
         private List<string> messages = new List<string>();
         public PokerUser PokerUser { get; set; }
+        public TableViewModel SelectedTable { get; set; }
+
 
         List<Card> flop = new List<Card>();
         List<Card> ownCards = new List<Card>();
@@ -58,15 +60,28 @@ namespace Poker.Client.Pages
 
             await hubConnection.SendAsync("GetUsers");
 
+            await hubConnection.SendAsync("GetTables");
+
             PokerUser = AuthService.PokerUser;
 
         }
 
         async Task AddTable()
         {
-
+            await AuthService.HubConnection.SendAsync("AddTable");
         }
 
+
+        async Task JoinToTable(TableViewModel tableViewModel) {
+            SelectedTable = tableViewModel;
+            await AuthService.HubConnection.SendAsync("JoinToTable", tableViewModel.Id, AuthService.PokerUser);
+        }
+
+        async Task LeaveTable(TableViewModel tableViewModel)
+        {
+            SelectedTable = null;
+            await AuthService.HubConnection.SendAsync("LeaveTable", tableViewModel.Id, AuthService.PokerUser);
+        }
 
         async Task Logout()
         {
