@@ -1,0 +1,21 @@
+﻿@inherits LayoutComponentBase
+@inject Poker.Client.Services.AuthService AuthService
+@inject NavigationManager NavigationManager
+
+    @if (AuthService.LoggedIn)
+    {
+        <div class="main">
+            @Body
+        </div>
+    }
+
+@code{ 
+    protected override void OnInitialized()
+    {
+        if (!AuthService.LoggedIn)
+        {
+            NavigationManager.NavigateTo("/login");
+        }
+    }
+}
+

@@ -1,0 +1,8 @@
+.vs/
+.git/
+Poker/Shared/obj
+Poker/Client/obj
+Poker/Server/obj
+Poker/Shared/bin
+Poker/Client/bin
+Poker/Server/bin

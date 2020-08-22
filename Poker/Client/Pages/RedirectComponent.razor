@@ -1,0 +1,15 @@
+﻿@inject NavigationManager NavigationManager
+
+<div>
+
+</div>
+
+@code {
+    [Parameter]
+    public string RedirectUri { get; set; }
+
+    protected override void OnParametersSet()
+    {
+        NavigationManager.NavigateTo($"/login");
+    }
+}

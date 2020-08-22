@@ -1,0 +1,44 @@
+﻿@page "/register"
+@layout LoginLayout
+@inject HttpClient Http
+
+<div class="login-container">
+    <EditForm Model="@RegistrationData" class="form-signin" OnValidSubmit="@Register">
+        <DataAnnotationsValidator />
+        <ValidationSummary style="color: red" />
+        <h1 class="h3 mb-3 font-weight-normal">Please sign in</h1>
+        <div>
+            <div class="login-field">
+                <InputText @bind-Value="RegistrationData.Username" placeholder="Username" class="form-control"></InputText>
+            </div>
+            <div class="login-field">
+                <InputText type="password" @bind-Value="RegistrationData.Password" placeholder="Password" class="form-control"></InputText>
+            </div>
+            <div class="login-field">
+                <InputText @bind-Value="RegistrationData.FirstName" placeholder="First name" class="form-control"></InputText>
+            </div>
+            <div class="login-field">
+                <InputText @bind-Value="RegistrationData.LastName" placeholder="Last name" class="form-control"></InputText>
+            </div>
+        </div>
+        <button class="btn btn-lg btn-primary btn-block" type="submit">Sign in</button>
+        <p class="mt-5 mb-3 text-muted">&copy; 2017-2020</p>
+    </EditForm>
+</div>
+
+@code {
+    public RegistrationData RegistrationData { get; set; }
+
+    protected override void OnInitialized()
+    {
+        RegistrationData = new RegistrationData();
+        base.OnInitialized();
+    }
+
+    public async Task Register()
+    {
+        var result = await Http.PostAsJsonAsync("api/registration", RegistrationData);
+        bool content = await result.Content.ReadFromJsonAsync<bool>();
+        Console.WriteLine(content);
+    }
+}

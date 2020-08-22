@@ -1,0 +1,56 @@
+﻿@page "/login"
+@layout LoginLayout
+@inject Poker.Client.Services.AuthService AuthService
+@inject NavigationManager _navigationManager;
+
+
+<div class="login-container">
+    <EditForm Model="@LoginData" class="form-signin" OnValidSubmit="@Login">
+        <DataAnnotationsValidator />
+        <ValidationSummary style="color: red" />
+        <h1 class="h3 mb-3 font-weight-normal">Please sign in</h1>
+        <div>
+            <div class="login-field">
+                <InputText @bind-Value="LoginData.Username" placeholder="Username" id="username" class="form-control"></InputText>
+            </div>
+            <div class="login-field">
+                <InputText type="password" @bind-Value="LoginData.Password" placeholder="Password" id="password" class="form-control"></InputText>
+            </div>
+        </div>
+        <button class="btn btn-lg btn-success btn-block" type="submit">Sign in</button>
+        <button class="btn btn-lg btn-success btn-block" type="button" @onclick="@NavigateToRegister">Register</button>
+        @if (Loading)
+        {
+            <div class="loading-container">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="sr-only">Loading...</span>
+                </div>
+            </div>
+        }
+        <p class="mt-5 mb-3">&copy; Diplomamunka - Szécsényi Ferenc</p>
+    </EditForm>
+</div>
+
+@code {
+    public LoginData LoginData { get; set; }
+    public bool Loading { get; set; }
+
+    protected override void OnInitialized()
+    {
+        LoginData = new LoginData();
+        base.OnInitialized();
+    }
+
+    public async Task Login()
+    {
+        Loading = true;
+        await AuthService.Login(LoginData);
+        Loading = false;
+        StateHasChanged();
+    }
+
+    public void NavigateToRegister()
+    {
+        _navigationManager.NavigateTo("/register");
+    }
+}

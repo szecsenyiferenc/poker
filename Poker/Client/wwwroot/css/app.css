@@ -1,0 +1,47 @@
+﻿@import url('open-iconic/font/css/open-iconic-bootstrap.min.css');
+
+html, body {
+    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    height: 100%;
+    width: 100%;
+    background-color: grey;
+}
+
+app {
+    height: 100%;
+    width: 100%;
+}
+
+.main {
+    height: 100%;
+    width: 100%;
+    position: relative;
+    background-color: grey;
+    color: white;
+}
+
+.poker-card {
+    height: 50px;
+    border: solid 1px gray;
+    border-radius: 4px;
+}
+
+.invalid {
+    /*outline: 1px solid red;*/
+    border-color: #ff0000;
+    border-width: 1px;
+}
+
+.validation-errors{
+    padding: 0px;
+    list-style: none;
+}
+
+.loading-container{
+    height: 100%;
+    width: 100%;
+    display: flex;
+    flex-flow: row nowrap;
+    justify-content: center;
+    align-items: center;
+}

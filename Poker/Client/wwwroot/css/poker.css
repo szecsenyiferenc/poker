@@ -1,0 +1,99 @@
+﻿.login-container {
+    display: flex;
+    flex-flow: column nowrap;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+}
+
+.login-field{
+    margin: 5px;
+}
+
+/*.poker-container {
+    width: 100%;
+    height: 100%;
+    display: grid;
+    grid-template-rows: 1fr 1fr 1fr;
+    grid-template-columns: 1fr 1fr 1fr;
+    background: rgb(4,233,7);
+    background: radial-gradient(circle, rgba(4,233,7,1) 0%, rgba(2,64,2,1) 100%);
+}
+*/
+.poker-top {
+    grid-row: 1;
+    grid-column: 2;
+    justify-self: center;
+    align-self: center;
+}
+
+.poker-top-left {
+    grid-row: 1;
+    grid-column: 1;
+    justify-self: flex-end;
+    align-self: flex-end;
+}
+
+.poker-top-right {
+    grid-row: 1;
+    grid-column: 3;
+    justify-self: flex-start;
+    align-self: flex-end;
+}
+
+.poker-middle {
+    grid-row: 2;
+    grid-column: 2;
+    justify-self: center;
+    align-self: center;
+}
+
+.poker-bottom {
+    grid-row: 3;
+    grid-column: 2;
+    justify-self: center;
+    align-self: center;
+}
+
+.poker-bottom-left {
+    grid-row: 3;
+    grid-column: 1;
+    justify-self: flex-end;
+    align-self: flex-start;
+}
+
+.poker-bottom-right {
+    grid-row: 3;
+    grid-column: 3;
+    justify-self: flex-start;
+    align-self: flex-start;
+}
+
+.poker-card {
+    height: 100px;
+    border: solid 1px gray;
+    border-radius: 4px;
+    margin: 5px;
+}
+
+.poker-row {
+    display: flex;
+    flex-flow: row nowrap;
+}
+
+.noselect {
+    -webkit-touch-callout: none; /* iOS Safari */
+    -webkit-user-select: none; /* Safari */
+    -moz-user-select: none; /* Old versions of Firefox */
+    -ms-user-select: none; /* Internet Explorer/Edge */
+    user-select: none; /* Non-prefixed version, currently
+                                  supported by Chrome, Edge, Opera and Firefox */
+}
+
+.poker-result{
+    margin: 20px;
+    position: absolute;
+    z-index: 10;
+    font-size: 32px;
+    color: white;
+}

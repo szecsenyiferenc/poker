@@ -1,0 +1,38 @@
+﻿<div class="navbar-container">
+    <div>
+        Logged in as @Username
+    </div>
+    <div class="navbar-button-container">
+        <div class="poker-button noselect" @onclick="@SettingsClick">Settings</div>
+        <div class="poker-button noselect" @onclick="@LogoutClick">Logout</div>
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public PokerUser PokerUser { get; set; }
+
+    [Parameter]
+    public EventCallback SettingsClick { get; set; }
+
+    [Parameter]
+    public EventCallback LogoutClick { get; set; }
+
+    public string Username { get => PokerUser?.Username; }
+
+    protected override void OnParametersSet()
+    {
+        StateHasChanged();
+        base.OnParametersSet();
+    }
+
+    public async Task OnSettingsClick()
+    {
+        await SettingsClick.InvokeAsync(null);
+    }
+
+    public async Task OnLogoutClick()
+    {
+        await LogoutClick.InvokeAsync(null);
+    }
+}

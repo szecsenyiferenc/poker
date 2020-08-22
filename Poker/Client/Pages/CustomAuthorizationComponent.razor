@@ -1,0 +1,23 @@
+﻿@inject Poker.Client.Services.AuthService AuthService
+@inject NavigationManager NavigationManager
+
+<div>
+    @if (AuthService.LoggedIn)
+    {
+        @Component
+    }
+    else
+    {
+        <RedirectComponent />
+    }
+</div>
+
+@code {
+    [Parameter]
+    public RenderFragment Component { get; set; }
+
+    protected override void OnParametersSet()
+    {
+        var asd = Component.Target;
+    }
+}

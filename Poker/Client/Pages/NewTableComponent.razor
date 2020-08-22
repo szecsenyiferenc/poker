@@ -1,0 +1,13 @@
+﻿<div class="poker-table poker-table-new noselect">
+    <div @onclick="@PlusClicked">+</div>
+</div>
+
+@code {
+    [Parameter]
+    public EventCallback OnClick { get; set; }
+
+    public async Task PlusClicked()
+    {
+        await OnClick.InvokeAsync(null);
+    }
+}

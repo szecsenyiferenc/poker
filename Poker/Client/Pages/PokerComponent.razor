@@ -1,0 +1,21 @@
+﻿@page "/"
+@inject Poker.Client.Services.AuthService AuthService
+@inject NavigationManager _navigationManager
+
+<div class="poker-root">
+    <NavigationBarComponent PokerUser="@PokerUser" LogoutClick="@Logout"></NavigationBarComponent>
+    <div class="main-container">
+        <div class="table-container">
+            @foreach (var table in _tables)
+            {
+                <TableComponent Table="@table"></TableComponent>
+            }
+            <NewTableComponent OnClick="@AddTable"></NewTableComponent>
+        </div>
+        <div class="poker-container">
+            <div class="poker-welcome-text noselect">
+                Please join to a table!
+            </div>
+        </div>
+    </div>
+</div>
