@@ -15,6 +15,7 @@ namespace Poker.Shared.Models.PokerModels
         public int PlayerNumber { get => PokerUsers.Count; }
         public int MaxNumber { get; set; }
         public string Name { get; set; }
+        public bool IsRunning { get; set; }
 
         public Table(int id, string name)
         {
@@ -35,10 +36,13 @@ namespace Poker.Shared.Models.PokerModels
             return true;
         }
 
-        public async Task Next()
+        public async Task Next(IHubEventEmitter hubEventEmitter)
         {
+            IsRunning = true;
             Game = new Game(PokerUsers);
-            await Game.Next();
+            await Game.Next(hubEventEmitter);
+            IsRunning = false;
+            Console.WriteLine("Win");
         }
 
     }

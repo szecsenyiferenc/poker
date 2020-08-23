@@ -27,10 +27,10 @@ namespace Poker.Shared.Models.DomainModels
             return returnedCards;
         }
 
-        public List<Card> GetCards()
+        public List<Card> GetCards(int number)
         {
-            var returnedCards = Cards.Take(2).ToList();
-            Cards = Cards.Skip(2).ToList();
+            var returnedCards = Cards.Take(number).ToList();
+            Cards = Cards.Skip(number).ToList();
             return returnedCards;
         }
 

@@ -1,6 +1,4 @@
 ﻿@page "/"
-@inject Poker.Client.Services.AuthService AuthService
-@inject NavigationManager _navigationManager
 
 <div class="poker-root">
     <NavigationBarComponent PokerUser="@PokerUser" LogoutClick="@Logout"></NavigationBarComponent>
@@ -10,7 +8,7 @@
             {
                 <div class="table-overlay">
                     <div>Selected Table: @SelectedTable.Name</div>
-                    <div class="poker-button noselect" @onclick="@(() => LeaveTable(SelectedTable))">Leave</div>
+                    <div class="poker-button noselect" @onclick="@(() => LeaveTable())">Leave</div>
                 </div>
             }
             @foreach (var table in _tables)
@@ -20,9 +18,52 @@
             <NewTableComponent OnClick="@AddTable"></NewTableComponent>
         </div>
         <div class="poker-container">
-            <div class="poker-welcome-text noselect">
-                Please join to a table!
-            </div>
+            @if (SelectedTable == null)
+            {
+                <div class="poker-welcome-text noselect">
+                    Please join to a table!
+                </div>
+            }
+            else
+            {
+                <div class="poker-game-container">
+                    <div class="poker-top">
+                        <CardRowComponent Cards="GetTopCards()"></CardRowComponent>
+                    </div>
+                    <div class="poker-top-left">
+                        <CardRowComponent Cards="GetTopCards()"></CardRowComponent>
+                    </div>
+                    <div class="poker-top-right">
+                        <CardRowComponent Cards="GetTopCards()"></CardRowComponent>
+                    </div>
+                    <div class="poker-middle">
+                        <CardRowComponent Cards="flop"></CardRowComponent>
+                    </div>
+                    <div class="poker-bottom">
+                        <CardRowComponent Cards="ownCards"></CardRowComponent>
+                    </div>
+                    <div class="poker-bottom-left">
+                        <CardRowComponent Cards="GetTopCards()"></CardRowComponent>
+                    </div>
+                    <div class="poker-bottom-right">
+                        <CardRowComponent Cards="GetTopCards()"></CardRowComponent>
+                    </div>
+                    <div class="poker-result noselect">
+                        @*@Result()*@
+                        <div>Hello</div>
+                        @if (CurrentSessionGuid != null)
+                        {
+                            @foreach (var item in Enum.GetValues(typeof(Poker.Shared.Enums.PokerActionType)))
+                            {
+                                <div class="poker-button noselect" @onclick="() => SendAction((Poker.Shared.Enums.PokerActionType)item)">@item.ToString()</div>
+                            }
+                        }
+
+                        @*<button @onclick="Start">Button</button>*@
+                    </div>
+                </div>
+            }
+
         </div>
     </div>
 </div>

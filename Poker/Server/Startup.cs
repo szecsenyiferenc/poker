@@ -30,6 +30,7 @@ namespace Poker.Server
             services.AddHttpContextAccessor();
             services.AddSignalR();
             services.AddControllersWithViews();
+
             services.AddRazorPages();
             services.InitIOC();
         }

@@ -2,7 +2,10 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Poker.Server.DatabaseContext;
+using Poker.Server.Hubs;
+using Poker.Server.Managers;
 using Poker.Server.Providers;
+using Poker.Server.Proxies;
 using Poker.Server.Services;
 using Poker.Shared.Models.DatabaseModels;
 using Poker.Shared.Models.DomainModels;
@@ -30,7 +33,12 @@ namespace Poker.Server.ConfigurationExtensions
             services.AddSingleton<Mapper>();
             services.AddSingleton<TableProvider>();
             services.AddSingleton<PokerUserProvider>();
+            services.AddSingleton<EventProxy>();
+            services.AddSingleton<HubEventEmitter>();
+            services.AddSingleton<TableManager>();
+
             services.AddTransient<DatabaseService>();
+
 
             return services;
         }

@@ -91,6 +91,8 @@
     flex-flow: row nowrap;
     justify-content: center;
     align-items: center;
+    background: rgb(4,233,7);
+    background: radial-gradient(circle, rgba(4,233,7,1) 0%, rgba(2,64,2,1) 100%);
 }
 
 .poker-welcome-text {

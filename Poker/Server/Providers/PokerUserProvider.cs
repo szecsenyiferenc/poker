@@ -29,10 +29,20 @@ namespace Poker.Server.Providers
             return null;
         }
 
+        public void SetConnectionId(string id, string connectionId)
+        {
+            _currentUsers[id].ConnectionId = connectionId;
+        }
+
         public PokerUser GetUser(string id)
         {
             var found = _currentUsers.TryGetValue(id, out PokerUser pokerUser);
             return found ? pokerUser : null;
+        }
+
+        public PokerUser GetUser(PokerUser pokerUser)
+        {
+            return _currentUsers.FirstOrDefault(p => p.Value != null && p.Value.Username == pokerUser.Username).Value;
         }
 
         public string GetId(PokerUser pokerUser)

@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.SignalR.Client;
 using Poker.Client.Services;
+using Poker.Shared.Enums;
 using Poker.Shared.Managers;
 using Poker.Shared.Models.DomainModels;
 using Poker.Shared.Models.PokerModels;
@@ -14,32 +15,42 @@ namespace Poker.Client.Pages
 {
     public partial class PokerComponent
     {
-        private string PlayerName { get; set; }
-        private List<string> messages = new List<string>();
+        [Inject]
+        public AuthService AuthService { get; set; }
+
+        [Inject]
+        public NavigationManager NavigationManager { get; set; }
+
+
         public PokerUser PokerUser { get; set; }
         public TableViewModel SelectedTable { get; set; }
-
+        public string CurrentSessionGuid { get; private set; }
 
         List<Card> flop = new List<Card>();
         List<Card> ownCards = new List<Card>();
         List<Card>[] hands = new List<Card>[6];
         List<PokerUser> players;
 
-        List<TableViewModel> _tables = new List<TableViewModel>();
 
-        GameManager gameManager;
+        List<TableViewModel> _tables = new List<TableViewModel>();
 
         public PokerComponent()
         {
-            gameManager = new GameManager();
             players = new List<PokerUser>();
-           
-            //_navigationManager = NavigationManager;
-            //unknownCards = new List<UnknownCard>
-            //{
-            //    new UnknownCard(),
-            //    new UnknownCard()
-            //};
+
+            ownCards = new List<Card>(){
+                new Card(CardColor.Diamond, CardType.Ace),
+                new Card(CardColor.Diamond, CardType.King)
+            };
+
+            flop = new List<Card>(){
+                new Card(CardColor.Club, CardType.Three),
+                new Card(CardColor.Heart, CardType.Queen),
+                new Card(CardColor.Diamond, CardType.Queen),
+                new Card(CardColor.Spade, CardType.Five),
+                new Card(CardColor.Spade, CardType.Four)
+            };
+
 
             for (int i = 0; i < hands.Length; i++)
             {
@@ -50,11 +61,34 @@ namespace Poker.Client.Pages
 
         protected override async Task OnInitializedAsync()
         {
+            if(AuthService == null)
+            {
+                throw new Exception("no authService");
+            }
+
             var hubConnection = AuthService.HubConnection;
 
             hubConnection.On<List<TableViewModel>>("GetTables", (tables) =>
             {
                 _tables = tables;
+                StateHasChanged();
+            });
+
+            hubConnection.On<string>("Test", (test) =>
+            {
+                Console.WriteLine(test);
+                StateHasChanged();
+            });
+
+            hubConnection.On("Fold", () =>
+            {
+                CurrentSessionGuid = null;
+                StateHasChanged();
+            });
+
+            hubConnection.On<string, string>("SendMessageToUser", (guid, text) =>
+            {
+                CurrentSessionGuid = guid;
                 StateHasChanged();
             });
 
@@ -77,15 +111,22 @@ namespace Poker.Client.Pages
             await AuthService.HubConnection.SendAsync("JoinToTable", tableViewModel.Id, AuthService.PokerUser);
         }
 
-        async Task LeaveTable(TableViewModel tableViewModel)
+        async Task LeaveTable()
         {
+            await AuthService.HubConnection.SendAsync("LeaveTable", SelectedTable.Id, AuthService.PokerUser);
             SelectedTable = null;
-            await AuthService.HubConnection.SendAsync("LeaveTable", tableViewModel.Id, AuthService.PokerUser);
         }
 
         async Task Logout()
         {
+            SelectedTable = null;
             await AuthService.Logout();
+        }
+
+        async Task SendAction(PokerActionType pokerActionType)
+        {
+            await AuthService.HubConnection.SendAsync("SendAnswer", CurrentSessionGuid, new PokerAction(pokerActionType));
+            CurrentSessionGuid = null;
         }
 
 

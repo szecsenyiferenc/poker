@@ -19,7 +19,7 @@ namespace Poker.Client.Services
         private LoggedInUser _loggedInUser;
         public bool LoggedIn { get => _loggedInUser?.PokerUser != null; }
         public PokerUser PokerUser { get => _loggedInUser?.PokerUser; }
-        public HubConnection HubConnection { get => IsConnected ? _hubConnection : null; }
+        public HubConnection HubConnection { get => IsConnected && _hubConnection != null ? _hubConnection : null; }
 
         public AuthService(RestBackendService restBackendService, NavigationManager navigationManager)
         {

@@ -10,7 +10,7 @@
     margin: 5px;
 }
 
-/*.poker-container {
+.poker-game-container {
     width: 100%;
     height: 100%;
     display: grid;
@@ -19,7 +19,7 @@
     background: rgb(4,233,7);
     background: radial-gradient(circle, rgba(4,233,7,1) 0%, rgba(2,64,2,1) 100%);
 }
-*/
+
 .poker-top {
     grid-row: 1;
     grid-column: 2;

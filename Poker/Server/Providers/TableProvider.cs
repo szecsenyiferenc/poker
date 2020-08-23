@@ -29,6 +29,11 @@ namespace Poker.Server.Providers
             return tables;
         }
 
+        public Table GetCurrentTable(int tableId)
+        {
+            return Tables.FirstOrDefault(t => t.Id == tableId);
+        }
+
         public List<TableViewModel> GetAllTableViews()
         {
             var list = new List<TableViewModel>();
@@ -50,16 +55,28 @@ namespace Poker.Server.Providers
             return false;
         }
 
-        public bool LeaveTable(int tableId, PokerUser pokerUser)
+        public int LeaveTable(PokerUser pokerUser)
+        {
+            if (Tables.Any(a => a.PokerUsers.Any(p => p.Username == pokerUser.Username)))
+            {
+                var table = Tables.FirstOrDefault(a => a.PokerUsers.Any(p => p.Username == pokerUser.Username));
+                var markedUser = table.PokerUsers.FirstOrDefault(p => p.Username == pokerUser.Username);
+                var result = table?.PokerUsers.Remove(markedUser);
+                return table.Id;
+            }
+            return -1;
+        }
+
+        public int LeaveTable(int tableId, PokerUser pokerUser)
         {
             if (Tables.Any(a => a.PokerUsers.Any(p => p.Username == pokerUser.Username)))
             {
                 var table = Tables.FirstOrDefault(t => t.Id == tableId);
                 var markedUser = table.PokerUsers.FirstOrDefault(p => p.Username == pokerUser.Username);
                 var result = table?.PokerUsers.Remove(markedUser);
-                return result.HasValue ? result.Value : false;
+                return tableId;
             }
-            return false;
+            return -1;
         }
 
         public void IncrementTables() {

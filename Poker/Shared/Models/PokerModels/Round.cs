@@ -18,9 +18,18 @@ namespace Poker.Shared.Models.PokerModels
             RoundType = roundType;
         }
 
-        public async Task Next()
+        public async Task Next(IHubEventEmitter hubEventEmitter)
         {
-
+            foreach (var player in Players)
+            {
+                var result = await hubEventEmitter.SendMessageToUser<object, PokerAction>(player, null);
+                if(result == null)
+                {
+                    result = new PokerAction(PokerActionType.Fold);
+                    await hubEventEmitter.FoldCards(player);
+                }
+                Console.WriteLine($"{player.Username} action: {result.PokerActionType}");
+            }
         }
     }
 }

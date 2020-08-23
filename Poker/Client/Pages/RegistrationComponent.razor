@@ -1,6 +1,8 @@
 ﻿@page "/register"
 @layout LoginLayout
 @inject HttpClient Http
+@inject NavigationManager NavigationManager;
+
 
 <div class="login-container">
     <EditForm Model="@RegistrationData" class="form-signin" OnValidSubmit="@Register">
@@ -21,7 +23,7 @@
                 <InputText @bind-Value="RegistrationData.LastName" placeholder="Last name" class="form-control"></InputText>
             </div>
         </div>
-        <button class="btn btn-lg btn-primary btn-block" type="submit">Sign in</button>
+        <button class="btn btn-lg btn-success btn-block" type="submit">Registration</button>
         <p class="mt-5 mb-3 text-muted">&copy; 2017-2020</p>
     </EditForm>
 </div>
@@ -39,6 +41,10 @@
     {
         var result = await Http.PostAsJsonAsync("api/registration", RegistrationData);
         bool content = await result.Content.ReadFromJsonAsync<bool>();
-        Console.WriteLine(content);
+        if (content)
+        {
+            NavigationManager.NavigateTo("/login");
+        }
     }
+
 }
