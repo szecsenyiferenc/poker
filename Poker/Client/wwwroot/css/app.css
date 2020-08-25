@@ -45,3 +45,10 @@ app {
     justify-content: center;
     align-items: center;
 }
+
+.progress {
+    direction: rtl;
+    margin-right: 4px;
+    margin-left: 4px;
+    margin-bottom: 4px;
+}

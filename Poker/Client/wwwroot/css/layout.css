@@ -46,8 +46,10 @@
     font-weight: 500;
 }
 
-.poker-button:hover{
+.poker-button:hover {
     cursor: pointer;
+    background-color: white;
+    color: gray;
 }
 
 .main-container {

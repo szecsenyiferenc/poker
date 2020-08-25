@@ -43,7 +43,7 @@ namespace Poker.Server.Hubs
             int counter = 0;
             while (!_answers.ContainsKey(guid))
             {
-                if(counter >= 10)
+                if(counter >= 15)
                 {
                     return null;
                 }

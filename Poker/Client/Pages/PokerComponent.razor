@@ -50,17 +50,28 @@
                     </div>
                     <div class="poker-result noselect">
                         @*@Result()*@
-                        <div>Hello</div>
                         @if (CurrentSessionGuid != null)
                         {
-                            @foreach (var item in Enum.GetValues(typeof(Poker.Shared.Enums.PokerActionType)))
-                            {
-                                <div class="poker-button noselect" @onclick="() => SendAction((Poker.Shared.Enums.PokerActionType)item)">@item.ToString()</div>
+                        <div class="poker-hud-container">
+                            <div class="progress">
+                                <div class="progress-bar progress-bar-striped bg-success justify-content-end @((!ProgressPercent.Color.Equals(default(Poker.Shared.Models.PokerModels.ProgressPercent)) ? ProgressPercent.Color : ""))" role="progressbar" aria-valuenow="@ProgressPercent.Percent" aria-valuemin="0" aria-valuemax="100" style="transform: rotate(180deg); width: @ProgressPercent.ToString()"></div>
+                            </div>
+                            <div class="poker-slider">
+                                <input class="poker-slider-range"type="range" min="@MinValue" max="@MaxValue" @bind="Balance" @bind:event="oninput" step="50">
+                                <div class="form-control poker-raise noselect">
+                                    @Balance
+                                </div>
+                            </div>
+                            <div class="poker-action-container">
+                                @foreach (var item in Enum.GetValues(typeof(Poker.Shared.Enums.PokerActionType)))
+                                {
+                                    <div class="poker-button noselect" @onclick="() => SendAction((Poker.Shared.Enums.PokerActionType)item)">@item.ToString()</div>
+                                }
+                            </div>
+                        </div>
                             }
-                        }
-
-                        @*<button @onclick="Start">Button</button>*@
-                    </div>
+                            @*<button @onclick="Start">Button</button>*@
+                        </div>
                 </div>
             }
 

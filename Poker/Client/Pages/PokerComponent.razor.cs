@@ -25,6 +25,10 @@ namespace Poker.Client.Pages
         public PokerUser PokerUser { get; set; }
         public TableViewModel SelectedTable { get; set; }
         public string CurrentSessionGuid { get; private set; }
+        public ProgressPercent ProgressPercent { get; private set; }
+        public int MinValue { get; private set; }
+        public int MaxValue { get; private set; }
+        public int Balance { get; private set; }
 
         List<Card> flop = new List<Card>();
         List<Card> ownCards = new List<Card>();
@@ -36,6 +40,10 @@ namespace Poker.Client.Pages
 
         public PokerComponent()
         {
+            MinValue = 100;
+            MaxValue = 2020;
+            Balance = 200;
+
             players = new List<PokerUser>();
 
             ownCards = new List<Card>(){
@@ -86,10 +94,11 @@ namespace Poker.Client.Pages
                 StateHasChanged();
             });
 
-            hubConnection.On<string, string>("SendMessageToUser", (guid, text) =>
+            hubConnection.On<string, string>("SendMessageToUser", async (guid, text) =>
             {
                 CurrentSessionGuid = guid;
                 StateHasChanged();
+                await StartCount();
             });
 
             await hubConnection.SendAsync("GetUsers");
@@ -127,6 +136,27 @@ namespace Poker.Client.Pages
         {
             await AuthService.HubConnection.SendAsync("SendAnswer", CurrentSessionGuid, new PokerAction(pokerActionType));
             CurrentSessionGuid = null;
+        }
+
+        async Task StartCount()
+        {
+            ProgressPercent = new ProgressPercent(0);
+            StateHasChanged();
+
+            var startDate = DateTime.Now;
+            var gap = TimeSpan.FromSeconds(14.5).TotalSeconds;
+
+            var currentValue = (DateTime.Now - startDate).TotalSeconds;
+
+            while (currentValue <= gap)
+            {
+                currentValue = (DateTime.Now - startDate).TotalSeconds;
+
+                ProgressPercent = new ProgressPercent(currentValue / gap * 100);
+
+                await Task.Delay(25);
+                StateHasChanged();
+            }
         }
 
 
