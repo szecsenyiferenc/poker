@@ -36,11 +36,17 @@ namespace Poker.Shared.Models.PokerModels
             return true;
         }
 
+        public bool RemovePlayer(PokerUser player)
+        {
+            PokerUsers.Remove(player);
+            return true;
+        }
+
         public async Task Next(IHubEventEmitter hubEventEmitter)
         {
             IsRunning = true;
             Game = new Game(PokerUsers);
-            await Game.Next(hubEventEmitter);
+            await Game.Next(hubEventEmitter, this);
             IsRunning = false;
             Console.WriteLine("Win");
         }

@@ -49,7 +49,7 @@ namespace Poker.Server.Providers
             if(!Tables.Any(a => a.PokerUsers.Any(p => p.Username == pokerUser.Username)))
             {
                 var table = Tables.FirstOrDefault(t => t.Id == tableId);
-                table?.PokerUsers.Add(pokerUser);
+                table?.AddPlayer(pokerUser);
                 return true;
             }
             return false;
@@ -61,7 +61,7 @@ namespace Poker.Server.Providers
             {
                 var table = Tables.FirstOrDefault(a => a.PokerUsers.Any(p => p.Username == pokerUser.Username));
                 var markedUser = table.PokerUsers.FirstOrDefault(p => p.Username == pokerUser.Username);
-                var result = table?.PokerUsers.Remove(markedUser);
+                var result = table?.RemovePlayer(markedUser);
                 return table.Id;
             }
             return -1;
@@ -73,7 +73,7 @@ namespace Poker.Server.Providers
             {
                 var table = Tables.FirstOrDefault(t => t.Id == tableId);
                 var markedUser = table.PokerUsers.FirstOrDefault(p => p.Username == pokerUser.Username);
-                var result = table?.PokerUsers.Remove(markedUser);
+                var result = table?.RemovePlayer(markedUser);
                 return tableId;
             }
             return -1;

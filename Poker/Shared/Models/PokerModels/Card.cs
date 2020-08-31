@@ -41,4 +41,18 @@ namespace Poker.Shared.Models.DomainModels
             return $"{CardColor}_{CardType}";
         }
     }
+
+    public class UnknownCard : Card
+    {
+        public UnknownCard()
+        {
+
+        }
+
+        public override string ToString()
+        {
+            return "Unknown";
+        }
+    }
+
 }

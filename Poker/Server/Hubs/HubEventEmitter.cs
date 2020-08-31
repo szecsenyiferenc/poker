@@ -38,6 +38,11 @@ namespace Poker.Server.Hubs
             await _hubContext.Clients.Client(pokerUser.ConnectionId.ToString()).SendAsync("Fold");
         }
 
+        public async Task SendStatus(Table table, RoundStatus roundStatus)
+        {
+            await _hubContext.Clients.Group(table.Id.ToString()).SendAsync("SendStatus", roundStatus);
+        }
+
         private async Task<T> ReadValueFromDictionary<T>(string guid) where T : class
         {
             int counter = 0;
@@ -60,6 +65,9 @@ namespace Poker.Server.Hubs
             _answers.TryAdd(guid, value);
         }
 
-
+        public async Task SendCards(PokerUser pokerUser, List<Card> cards)
+        {
+            await _hubContext.Clients.Client(pokerUser.ConnectionId.ToString()).SendAsync("SendCards", cards);
+        }
     }
 }

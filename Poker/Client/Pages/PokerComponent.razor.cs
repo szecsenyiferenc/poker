@@ -22,6 +22,8 @@ namespace Poker.Client.Pages
         public NavigationManager NavigationManager { get; set; }
 
 
+
+
         public PokerUser PokerUser { get; set; }
         public TableViewModel SelectedTable { get; set; }
         public string CurrentSessionGuid { get; private set; }
@@ -29,11 +31,14 @@ namespace Poker.Client.Pages
         public int MinValue { get; private set; }
         public int MaxValue { get; private set; }
         public int Balance { get; private set; }
+        public Dictionary<int, string> StyleMap { get; set; }
+
+        public List<PokerUser> Players { get; set; }
 
         List<Card> flop = new List<Card>();
         List<Card> ownCards = new List<Card>();
+        List<Card> unknown = new List<Card>();
         List<Card>[] hands = new List<Card>[6];
-        List<PokerUser> players;
 
 
         List<TableViewModel> _tables = new List<TableViewModel>();
@@ -44,21 +49,14 @@ namespace Poker.Client.Pages
             MaxValue = 2020;
             Balance = 200;
 
-            players = new List<PokerUser>();
+            Players = new List<PokerUser>();
 
-            ownCards = new List<Card>(){
-                new Card(CardColor.Diamond, CardType.Ace),
-                new Card(CardColor.Diamond, CardType.King)
+            StyleMap = CreateStyleMap();
+
+            unknown = new List<Card>(){
+                new UnknownCard(),
+                new UnknownCard()
             };
-
-            flop = new List<Card>(){
-                new Card(CardColor.Club, CardType.Three),
-                new Card(CardColor.Heart, CardType.Queen),
-                new Card(CardColor.Diamond, CardType.Queen),
-                new Card(CardColor.Spade, CardType.Five),
-                new Card(CardColor.Spade, CardType.Four)
-            };
-
 
             for (int i = 0; i < hands.Length; i++)
             {
@@ -99,6 +97,27 @@ namespace Poker.Client.Pages
                 CurrentSessionGuid = guid;
                 StateHasChanged();
                 await StartCount();
+            });
+
+            hubConnection.On<List<PokerUser>>("PlayerStatus", pokerPlayers =>
+            {
+                Players = pokerPlayers;
+                StateHasChanged();
+            });
+
+            hubConnection.On<List<Card>>("SendCards", cards =>
+            {
+                ownCards = cards;
+                StateHasChanged();
+            });
+
+
+            hubConnection.On<RoundStatus>("SendStatus", roundStatus =>
+            {
+                var allCards = roundStatus.Flop;
+
+                flop = allCards;
+                StateHasChanged();
             });
 
             await hubConnection.SendAsync("GetUsers");
@@ -157,6 +176,21 @@ namespace Poker.Client.Pages
                 await Task.Delay(25);
                 StateHasChanged();
             }
+        }
+
+
+        private Dictionary<int, string> CreateStyleMap()
+        {
+            Dictionary<int, string> dict = new Dictionary<int, string>();
+
+            dict.Add(0, "poker-bottom");
+            dict.Add(1, "poker-bottom-right");
+            dict.Add(2, "poker-top-right");
+            dict.Add(3, "poker-top");
+            dict.Add(4, "poker-top-left");
+            dict.Add(5, "poker-bottom-left");
+
+            return dict;
         }
 
 

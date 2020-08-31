@@ -85,14 +85,14 @@ namespace Poker.Server.Hubs
             await Groups.AddToGroupAsync(Context.ConnectionId, tableId.ToString());
             await Clients.All.SendAsync("GetTables", _tableProvider.GetAllTableViews());
 
-            await Task.Delay(1000);
+            await Task.Delay(3000);
 
             var currentTable = _tableProvider.GetCurrentTable(tableId);
-            if(currentTable.PokerUsers.Count >= 2)
+            await Clients.Group(tableId.ToString()).SendAsync("PlayerStatus", currentTable.PokerUsers);
+
+            if (currentTable.PokerUsers.Count >= 2)
             {
-                
                 _eventProxy.GameStarted(currentTable);
-                //await Clients.Group(tableId.ToString()).SendAsync("Test", String.Join(',', currentTable.PokerUsers.Select(p => p.Username)));
             }
         }
 

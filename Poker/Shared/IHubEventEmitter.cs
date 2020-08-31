@@ -1,4 +1,5 @@
 ﻿using Poker.Shared.Models.DomainModels;
+using Poker.Shared.Models.PokerModels;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -10,5 +11,7 @@ namespace Poker.Shared
     {
         Task<T2> SendMessageToUser<T1, T2>(PokerUser pokerUser, T1 item) where T1 : class where T2 : class;
         Task FoldCards(PokerUser pokerUser);
+        Task SendStatus(Table table, RoundStatus roundStatus);
+        Task SendCards(PokerUser pokerUser, List<Card> cards);
     }
 }

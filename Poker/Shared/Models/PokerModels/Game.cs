@@ -22,7 +22,7 @@ namespace Poker.Shared.Models.DomainModels
             PokerUsers = players.ToList();
         }
 
-        public async Task Next(IHubEventEmitter hubEventEmitter)
+        public async Task Next(IHubEventEmitter hubEventEmitter, Table table)
         {
             var cards = new Dictionary<PokerUser, List<Card>>();
 
@@ -32,17 +32,29 @@ namespace Poker.Shared.Models.DomainModels
             foreach (var pokerUser in PokerUsers)
             {
                 cards[pokerUser] = deck.GetCards(2);
+                await hubEventEmitter.SendCards(pokerUser, cards[pokerUser]);
             }
 
             Round = new Round(PokerUsers, (RoundType)_turnState);
 
+            var RoundStatus = new RoundStatus();
+
             while (Round.RoundType != RoundType.End)
             {
                 Console.WriteLine($"Round type: {(RoundType)_turnState}");
-                if(Round.RoundType == RoundType.Flop)
+                switch(Round.RoundType)
                 {
-                    // await hubEventEmitter
+                    case RoundType.Flop:
+                        RoundStatus.Flop = deck.GetCards(3);
+                        break;
+                    case RoundType.Turn:
+                    case RoundType.River:
+                        RoundStatus.Flop.Add(deck.GetCards(1).First());
+                        break;
                 }
+
+                RoundStatus.RoundType = (RoundType)_turnState;
+                await hubEventEmitter.SendStatus(table, RoundStatus);
                 await Round.Next(hubEventEmitter);
                 _turnState++;
                 Round = new Round(PokerUsers, (RoundType)_turnState);
