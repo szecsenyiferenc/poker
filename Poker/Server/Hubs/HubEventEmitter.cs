@@ -69,5 +69,10 @@ namespace Poker.Server.Hubs
         {
             await _hubContext.Clients.Client(pokerUser.ConnectionId.ToString()).SendAsync("SendCards", cards);
         }
+
+        public async Task SendWinner(Table table, string name)
+        {
+            await _hubContext.Clients.Group(table.Id.ToString()).SendAsync("Test", name);
+        }
     }
 }

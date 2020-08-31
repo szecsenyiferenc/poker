@@ -1,4 +1,5 @@
 ﻿using Poker.Shared.Enums;
+using Poker.Shared.Managers;
 using Poker.Shared.Models.PokerModels;
 using System;
 using System.Collections.Generic;
@@ -14,7 +15,8 @@ namespace Poker.Shared.Models.DomainModels
 
         public List<PokerUser> PokerUsers { get; private set; }
         public Round Round { get; private set; }
-        //private Dictionary<PokerUser, List<Card>> _cards;
+        private Dictionary<PokerUser, List<Card>> _cards;
+        private Dictionary<PokerUser, Result> _results;
 
         public Game(List<PokerUser> players)
         {
@@ -24,15 +26,16 @@ namespace Poker.Shared.Models.DomainModels
 
         public async Task Next(IHubEventEmitter hubEventEmitter, Table table)
         {
-            var cards = new Dictionary<PokerUser, List<Card>>();
+            _cards = new Dictionary<PokerUser, List<Card>>();
+            _results = new Dictionary<PokerUser, Result>();
 
             var deck = new Deck();
             deck.Shuffle();
 
             foreach (var pokerUser in PokerUsers)
             {
-                cards[pokerUser] = deck.GetCards(2);
-                await hubEventEmitter.SendCards(pokerUser, cards[pokerUser]);
+                _cards[pokerUser] = deck.GetCards(2);
+                await hubEventEmitter.SendCards(pokerUser, _cards[pokerUser]);
             }
 
             Round = new Round(PokerUsers, (RoundType)_turnState);
@@ -59,6 +62,21 @@ namespace Poker.Shared.Models.DomainModels
                 _turnState++;
                 Round = new Round(PokerUsers, (RoundType)_turnState);
             }
+
+            var gm = new GameManager();
+
+            foreach (var item in _cards)
+            {
+                var playerCards = RoundStatus.Flop.ToList();
+                playerCards.AddRange(item.Value);
+                _results[item.Key] = gm.GetResult(playerCards);
+            }
+
+            var winner = _results.OrderByDescending(a => a.Value).First();
+
+            Console.WriteLine("Winner" + winner.Key.Username);
+
+            await hubEventEmitter.SendWinner(table, $"{winner.Key.Username} with [{winner.Value.Hand}] and with the following values: {winner.Value.Values}");
         }
     }
 }

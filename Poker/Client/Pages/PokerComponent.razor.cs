@@ -76,24 +76,27 @@ namespace Poker.Client.Pages
 
             hubConnection.On<List<TableViewModel>>("GetTables", (tables) =>
             {
+                Console.WriteLine("GetTables");
                 _tables = tables;
                 StateHasChanged();
             });
 
             hubConnection.On<string>("Test", (test) =>
             {
-                Console.WriteLine(test);
+                Console.WriteLine($"The Winner is... {test}");
                 StateHasChanged();
             });
 
             hubConnection.On("Fold", () =>
             {
+                Console.WriteLine("Fold");
                 CurrentSessionGuid = null;
                 StateHasChanged();
             });
 
             hubConnection.On<string, string>("SendMessageToUser", async (guid, text) =>
             {
+                Console.WriteLine("SendMessageToUser");
                 CurrentSessionGuid = guid;
                 StateHasChanged();
                 await StartCount();
@@ -101,12 +104,14 @@ namespace Poker.Client.Pages
 
             hubConnection.On<List<PokerUser>>("PlayerStatus", pokerPlayers =>
             {
+                Console.WriteLine("PlayerStatus");
                 Players = pokerPlayers;
                 StateHasChanged();
             });
 
             hubConnection.On<List<Card>>("SendCards", cards =>
             {
+                Console.WriteLine("SendCards");
                 ownCards = cards;
                 StateHasChanged();
             });
@@ -114,6 +119,8 @@ namespace Poker.Client.Pages
 
             hubConnection.On<RoundStatus>("SendStatus", roundStatus =>
             {
+                Console.WriteLine("SendStatus");
+
                 var allCards = roundStatus.Flop;
 
                 flop = allCards;

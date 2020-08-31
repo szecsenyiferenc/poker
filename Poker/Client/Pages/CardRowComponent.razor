@@ -1,6 +1,9 @@
 ﻿<div class="poker-row">
-    @foreach (var card in Cards)
+    @if (Cards != null)
     {
-        <CardComponent Card="card"></CardComponent>
+        @foreach (var card in Cards)
+        {
+            <CardComponent Card="card"></CardComponent>
+        }
     }
 </div>

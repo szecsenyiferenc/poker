@@ -13,5 +13,6 @@ namespace Poker.Shared
         Task FoldCards(PokerUser pokerUser);
         Task SendStatus(Table table, RoundStatus roundStatus);
         Task SendCards(PokerUser pokerUser, List<Card> cards);
+        Task SendWinner(Table table, string name);
     }
 }
