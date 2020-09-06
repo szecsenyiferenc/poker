@@ -20,11 +20,14 @@ namespace Poker.Shared.Models.DomainModels
         public IHubEventEmitter HubEventEmitter { get; private set; }
         public IEventProxy EventProxy { get; private set; }
         public Table Table { get; private set; }
+        public int Pot { get; set; }
 
         private Dictionary<PokerUser, List<Card>> _cards;
         private List<Card> _commonCards;
         private Deck _deck;
         private Timer _gameTimer;
+
+        
 
 
         public Game(Table table)

@@ -94,6 +94,8 @@ namespace Poker.Shared.Models.PokerModels
             {
                 var sendCardsToAll = new PokerAction(RoundType.End, Id, null, PokerActionType.RoundUpdate);
                 sendCardsToAll.Winner = result;
+                result.PokerUser.Balance += Game.Pot;
+
 
                 await HubEventEmitter.SendPokerAction(sendCardsToAll);
 

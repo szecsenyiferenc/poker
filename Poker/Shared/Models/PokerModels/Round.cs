@@ -29,6 +29,7 @@ namespace Poker.Shared.Models.PokerModels
 
             Players = game.Players;
             Players.ForEach(p => p.IsDone = false);
+            Players.ForEach(p => p.CurrentRaise = 0);
 
             RoundType = roundType;
         }
@@ -37,7 +38,7 @@ namespace Poker.Shared.Models.PokerModels
         {
             Player nextPlayer = null;
             PokerAction sendRaiseStatus;
-
+            int tempRaise;
 
             if (userAction != null)
             {
@@ -48,22 +49,50 @@ namespace Poker.Shared.Models.PokerModels
                         player.IsActive = false;
                         break;
                     case UserActionType.Call:
+                        tempRaise = player.CurrentRaise;
+                        Console.WriteLine("CALL - USER: " + player.Username);
+                        Console.WriteLine("CALL - USER CALL " + player.CurrentRaise);
+                        Console.WriteLine("CALL - USER CURRENT BALANCE " + player.Balance);
                         player.CurrentRaise = currentRaise;
-                        player.Balance -= player.CurrentRaise;
+                        player.Balance -= (player.CurrentRaise - tempRaise);
+                        Console.WriteLine("CALL - USER MOD BALANCE " + player.Balance);
+                        _game.Pot += (player.CurrentRaise - tempRaise);
                         sendRaiseStatus = new PokerAction(RoundType, _game.Table.Id, null, PokerActionType.RaiseHappened)
                         {
-                            PlayerWithRaise = player
+                            PlayerWithRaise = player,
+                            Pot = _game.Pot
                         };
                         await _hubEventEmitter.SendPokerAction(sendRaiseStatus);
                         break;
                     case UserActionType.Raise:
-                        player.CurrentRaise = userAction.Value;
-                        player.Balance -= player.CurrentRaise;
+                        tempRaise = player.CurrentRaise;
+                        Console.WriteLine("RAISE - USER: " + player.Username);
+                        Console.WriteLine("RAISE - USER TEMP RAISE " + tempRaise);
+                        Console.WriteLine("RAISE - USER CURRENT BALANCE " + player.Balance);
+                        player.CurrentRaise = userAction.Value + tempRaise;
+                        player.Balance -= (player.CurrentRaise - tempRaise);
+                        Console.WriteLine("RAISE - USER CURRENT RAISE " + player.CurrentRaise);
+                        Console.WriteLine("RAISE - USER MOD BALANCE " + player.Balance);
                         currentRaise = player.CurrentRaise;
+                        _game.Pot += (player.CurrentRaise - tempRaise);
                         Players.ForEach(p => p.IsDone = false);
                         sendRaiseStatus = new PokerAction(RoundType, _game.Table.Id, null, PokerActionType.RaiseHappened)
                         {
-                            PlayerWithRaise = player
+                            PlayerWithRaise = player,
+                            Pot = _game.Pot
+                        };
+                        await _hubEventEmitter.SendPokerAction(sendRaiseStatus);
+                        break;
+                    case UserActionType.AllIn:
+                        player.CurrentRaise = player.Balance;
+                        player.Balance -= player.CurrentRaise;
+                        currentRaise = player.CurrentRaise;
+                        _game.Pot += player.CurrentRaise;
+                        Players.ForEach(p => p.IsDone = false);
+                        sendRaiseStatus = new PokerAction(RoundType, _game.Table.Id, null, PokerActionType.RaiseHappened)
+                        {
+                            PlayerWithRaise = player,
+                            Pot = _game.Pot
                         };
                         await _hubEventEmitter.SendPokerAction(sendRaiseStatus);
                         break;

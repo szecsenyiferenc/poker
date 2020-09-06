@@ -22,6 +22,7 @@ namespace Poker.Shared.Models.PokerModels
         public List<PokerUserWithCards> Targets { get; set; }
         public List<Card> Cards { get; set; }
         public Player PlayerWithRaise { get; set; }
+        public int Pot { get; set; }
 
         public PokerAction()
         {

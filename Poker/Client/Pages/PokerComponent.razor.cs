@@ -27,14 +27,19 @@ namespace Poker.Client.Pages
         public PokerUser PokerUser { get; set; }
         public bool TablesEnabled { get; set; }
         public bool IsRaiseInProgess { get; set; }
+        public int MaxRaiseValue { get; set; }
+        public int MyRaiseValue { get; set; }
+        public bool IsRaise { get => CurrentValue != MinValue; }
         public PokerUser NextPlayer { get; set; }
         public Winner Winner { get; set; }
         public TableViewModel SelectedTable { get; set; }
         public string CurrentSessionGuid { get; private set; }
         public ProgressPercent ProgressPercent { get; private set; }
+        public int CurrentValue { get; set; }
         public int MinValue { get; private set; }
         public int MaxValue { get; private set; }
         public int Balance { get; private set; }
+        public int Pot { get; private set; }
 
         public Dictionary<int, string> StyleMap { get; set; }
 
@@ -50,9 +55,9 @@ namespace Poker.Client.Pages
 
         public PokerComponent()
         {
-            MinValue = 100;
-            MaxValue = 2020;
-            Balance = 200;
+            MinValue = 0;
+            CurrentValue = 0;
+            Balance = 0;
             TablesEnabled = true;
             IsRaiseInProgess = false;
 
@@ -165,12 +170,17 @@ namespace Poker.Client.Pages
                     var playerWithRaise = Players.FirstOrDefault(p => p.Username == pokerAction.PlayerWithRaise.Username);
                     playerWithRaise.CurrentRaise = pokerAction.PlayerWithRaise.CurrentRaise;
                     playerWithRaise.Balance = pokerAction.PlayerWithRaise.Balance;
+                    Pot = pokerAction.Pot;
                     IsRaiseInProgess = true;
+                    MaxRaiseValue = playerWithRaise.CurrentRaise;
+                    MinValue = playerWithRaise.CurrentRaise - MyRaiseValue;
                 }
 
                 if(pokerAction.Winner != null)
                 {
                     Winner = pokerAction.Winner;
+                    var winnerPlayer = Players.FirstOrDefault(p => p.Username == Winner.PokerUser.Username);
+                    winnerPlayer.Balance = pokerAction.Winner.PokerUser.Balance;
                 }
 
                 StateHasChanged();
@@ -195,6 +205,7 @@ namespace Poker.Client.Pages
                 ownCards = pokerAction.Targets.First().Cards;
                 flop = null;
                 Winner = null;
+                Pot = 0;
                 ResetRaiseState();
             }
             if (pokerAction.PokerActionType == PokerActionType.NextPlayer)
@@ -252,6 +263,8 @@ namespace Poker.Client.Pages
             NextPlayer = pokerAction.NextPlayer;
             if (pokerAction?.NextPlayer?.Username == PokerUser.Username)
             {
+                Balance = NextPlayer.Balance;
+                CurrentValue = MinValue;
                 Console.WriteLine("ENABLE");
                 CurrentSessionGuid = "1";
             }
@@ -272,6 +285,8 @@ namespace Poker.Client.Pages
         {
             Players.ForEach(p => p.CurrentRaise = 0);
             IsRaiseInProgess = false;
+            MaxRaiseValue = 0;
+            MyRaiseValue = 0;
         }
 
 
@@ -301,7 +316,29 @@ namespace Poker.Client.Pages
             switch (userActionType)
             {
                 case UserActionType.Raise:
-                    userAction = new UserAction(PokerUser, userActionType, Balance);
+                    if (IsRaise)
+                    {
+                        MyRaiseValue = CurrentValue;
+                        if (CurrentValue == MinValue)
+                        {
+                            if (IsRaiseInProgess)
+                            {
+                                userAction = new UserAction(PokerUser, UserActionType.Call);
+                            }
+                            else
+                            {
+                                userAction = new UserAction(PokerUser, UserActionType.Check);
+                            }
+                        }
+                        else if(CurrentValue == Balance)
+                        {
+                            userAction = new UserAction(PokerUser, UserActionType.AllIn);
+                        }
+                        else
+                        {
+                            userAction = new UserAction(PokerUser, userActionType, CurrentValue);
+                        }
+                    }
                     break;
                 case UserActionType.Call:
                     if (!IsRaiseInProgess)
@@ -346,6 +383,8 @@ namespace Poker.Client.Pages
                 StateHasChanged();
             }
         }
+
+
 
 
         private Dictionary<int, string> CreateStyleMap()
