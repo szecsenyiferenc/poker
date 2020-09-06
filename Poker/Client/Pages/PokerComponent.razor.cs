@@ -25,6 +25,8 @@ namespace Poker.Client.Pages
 
 
         public PokerUser PokerUser { get; set; }
+        public bool TablesEnabled { get; set; }
+        public bool IsRaiseInProgess { get; set; }
         public PokerUser NextPlayer { get; set; }
         public Winner Winner { get; set; }
         public TableViewModel SelectedTable { get; set; }
@@ -51,6 +53,8 @@ namespace Poker.Client.Pages
             MinValue = 100;
             MaxValue = 2020;
             Balance = 200;
+            TablesEnabled = true;
+            IsRaiseInProgess = false;
 
             Players = new List<Player>();
 
@@ -154,6 +158,16 @@ namespace Poker.Client.Pages
                         break;
                 }
 
+                if(pokerAction.PokerActionType == PokerActionType.RaiseHappened)
+                {
+                    Console.WriteLine("CurrentRaise");
+                    Console.WriteLine("Raised player - " + pokerAction.PlayerWithRaise.Username);
+                    var playerWithRaise = Players.FirstOrDefault(p => p.Username == pokerAction.PlayerWithRaise.Username);
+                    playerWithRaise.CurrentRaise = pokerAction.PlayerWithRaise.CurrentRaise;
+                    playerWithRaise.Balance = pokerAction.PlayerWithRaise.Balance;
+                    IsRaiseInProgess = true;
+                }
+
                 if(pokerAction.Winner != null)
                 {
                     Winner = pokerAction.Winner;
@@ -181,6 +195,7 @@ namespace Poker.Client.Pages
                 ownCards = pokerAction.Targets.First().Cards;
                 flop = null;
                 Winner = null;
+                ResetRaiseState();
             }
             if (pokerAction.PokerActionType == PokerActionType.NextPlayer)
             {
@@ -195,6 +210,7 @@ namespace Poker.Client.Pages
             {
                 Console.WriteLine("FlopRound - 1");
                 flop = pokerAction?.Cards;
+                ResetRaiseState();
             }
             if (pokerAction.PokerActionType == PokerActionType.NextPlayer)
             {
@@ -208,6 +224,7 @@ namespace Poker.Client.Pages
             {
                 Console.WriteLine("TurnRound - 1");
                 flop.Add(pokerAction?.Cards.First());
+                ResetRaiseState();
             }
             if (pokerAction.PokerActionType == PokerActionType.NextPlayer)
             {
@@ -221,6 +238,7 @@ namespace Poker.Client.Pages
             {
                 Console.WriteLine("RiverRound - 1");
                 flop.Add(pokerAction?.Cards.First());
+                ResetRaiseState();
             }
             if (pokerAction.PokerActionType == PokerActionType.NextPlayer)
             {
@@ -250,6 +268,12 @@ namespace Poker.Client.Pages
             await AuthService.HubConnection.SendAsync("AddTable");
         }
 
+        private void ResetRaiseState()
+        {
+            Players.ForEach(p => p.CurrentRaise = 0);
+            IsRaiseInProgess = false;
+        }
+
 
         async Task JoinToTable(TableViewModel tableViewModel) {
             SelectedTable = tableViewModel;
@@ -268,9 +292,37 @@ namespace Poker.Client.Pages
             await AuthService.Logout();
         }
 
+        
+
         async Task SendAction(UserActionType userActionType)
         {
-            await AuthService.HubConnection.SendAsync("SendUserAction", new UserAction(PokerUser, userActionType));
+            UserAction userAction = null;
+
+            switch (userActionType)
+            {
+                case UserActionType.Raise:
+                    userAction = new UserAction(PokerUser, userActionType, Balance);
+                    break;
+                case UserActionType.Call:
+                    if (!IsRaiseInProgess)
+                    {
+                        return;
+                    }
+                    userAction = new UserAction(PokerUser, userActionType);
+                    break;
+                case UserActionType.Check:
+                    if (IsRaiseInProgess)
+                    {
+                        return;
+                    }
+                    userAction = new UserAction(PokerUser, userActionType);
+                    break;
+                default:
+                    userAction = new UserAction(PokerUser, userActionType);
+                    break;
+            }
+
+            await AuthService.HubConnection.SendAsync("SendUserAction", userAction);
             CurrentSessionGuid = null;
         }
 
@@ -310,7 +362,11 @@ namespace Poker.Client.Pages
             return dict;
         }
 
-
+        void ChangeView()
+        {
+            TablesEnabled = !TablesEnabled;
+            StateHasChanged();
+        }
 
         public string Result()
         {

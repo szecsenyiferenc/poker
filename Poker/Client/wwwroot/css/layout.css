@@ -46,10 +46,20 @@
     font-weight: 500;
 }
 
+.poker-button-deactivated {
+    background-color: lightgray;
+}
+
 .poker-button:hover {
     cursor: pointer;
     background-color: white;
     color: gray;
+}
+
+.poker-button-deactivated:hover {
+    cursor: initial;
+    background-color: lightgray;
+    color: white;
 }
 
 .main-container {

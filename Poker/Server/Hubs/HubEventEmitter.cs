@@ -35,24 +35,28 @@ namespace Poker.Server.Hubs
 
         public async Task SendPokerAction(PokerAction pokerAction)
         {
-            if (pokerAction.PokerActionType == PokerActionType.RoundUpdate || pokerAction.PokerActionType == PokerActionType.NextPlayer)
+            switch (pokerAction.PokerActionType)
             {
-                await _hubContext.Clients.Group(pokerAction.TableId.ToString()).SendAsync("SendPokerAction", pokerAction);
-            }
-            if (pokerAction.PokerActionType == PokerActionType.StartingCards)
-            {
-                foreach (var target in pokerAction.Targets)
-                {
-                    var newTargets = new List<PokerUserWithCards>()
+                case PokerActionType.StartingCards:
+                    foreach (var target in pokerAction.Targets)
                     {
-                        target
-                    };
+                        var newTargets = new List<PokerUserWithCards>()
+                        {
+                            target
+                        };
 
-                    var newPokerAction = new PokerAction(pokerAction.RoundType,
-                        pokerAction.TableId, newTargets, PokerActionType.StartingCards);
-                    await _hubContext.Clients.Client(target.PokerUser.ConnectionId).SendAsync("SendPokerAction", newPokerAction);
-                }
+                        var newPokerAction = new PokerAction(pokerAction.RoundType,
+                            pokerAction.TableId, newTargets, PokerActionType.StartingCards);
+                        await _hubContext.Clients.Client(target.PokerUser.ConnectionId).SendAsync("SendPokerAction", newPokerAction);
+                    }
+                    break;
+                default:
+                    await _hubContext.Clients.Group(pokerAction.TableId.ToString()).SendAsync("SendPokerAction", pokerAction);
+                    break;
             }
+            
+                
+            
         }
 
     }

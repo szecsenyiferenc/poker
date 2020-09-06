@@ -36,8 +36,10 @@ namespace Poker.Shared.Models.PokerModels
         public async Task<bool> Next(UserAction userAction = null)
         {
             Player nextPlayer = null;
+            PokerAction sendRaiseStatus;
 
-            if(userAction != null)
+
+            if (userAction != null)
             {
                 var player = Players.Find(u => u.Username == userAction.PokerUser.Username);
                 switch (userAction.UserActionType)
@@ -45,9 +47,25 @@ namespace Poker.Shared.Models.PokerModels
                     case UserActionType.Fold:
                         player.IsActive = false;
                         break;
+                    case UserActionType.Call:
+                        player.CurrentRaise = currentRaise;
+                        player.Balance -= player.CurrentRaise;
+                        sendRaiseStatus = new PokerAction(RoundType, _game.Table.Id, null, PokerActionType.RaiseHappened)
+                        {
+                            PlayerWithRaise = player
+                        };
+                        await _hubEventEmitter.SendPokerAction(sendRaiseStatus);
+                        break;
                     case UserActionType.Raise:
-                        currentRaise = userAction.Value;
+                        player.CurrentRaise = userAction.Value;
+                        player.Balance -= player.CurrentRaise;
+                        currentRaise = player.CurrentRaise;
                         Players.ForEach(p => p.IsDone = false);
+                        sendRaiseStatus = new PokerAction(RoundType, _game.Table.Id, null, PokerActionType.RaiseHappened)
+                        {
+                            PlayerWithRaise = player
+                        };
+                        await _hubEventEmitter.SendPokerAction(sendRaiseStatus);
                         break;
                 }
 

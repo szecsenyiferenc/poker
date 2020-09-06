@@ -8,6 +8,7 @@ namespace Poker.Shared.Enums
     {
         StartingCards,
         RoundUpdate,
-        NextPlayer
+        NextPlayer,
+        RaiseHappened
     }
 }

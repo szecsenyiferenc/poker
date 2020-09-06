@@ -1,35 +1,39 @@
 ﻿@page "/"
 
 <div class="poker-root">
-    <NavigationBarComponent PokerUser="@PokerUser" LogoutClick="@Logout"></NavigationBarComponent>
+    <NavigationBarComponent PokerUser="@PokerUser" SettingsClick="@ChangeView" LogoutClick="@Logout"></NavigationBarComponent>
     <div class="main-container">
-        <div class="table-container">
-            @if (SelectedTable != null)
-            {
-                <div class="table-overlay">
-                    <div>Selected Table: @SelectedTable.Name</div>
-                    <div class="poker-button noselect" @onclick="@(() => LeaveTable())">Leave</div>
-                </div>
-            }
-            @foreach (var table in _tables)
-            {
-                <TableComponent Table="@table" OnClick="@(() => JoinToTable(table))"></TableComponent>
-            }
-            <NewTableComponent OnClick="@AddTable"></NewTableComponent>
-        </div>
+        @if (TablesEnabled)
+        {
+            <div class="table-container">
+
+                @if (SelectedTable != null)
+                {
+                    <div class="table-overlay">
+                        <div>Selected Table: @SelectedTable.Name</div>
+                        <div class="poker-button noselect" @onclick="@(() => LeaveTable())">Leave</div>
+                    </div>
+                }
+                @foreach (var table in _tables)
+                {
+                    <TableComponent Table="@table" OnClick="@(() => JoinToTable(table))"></TableComponent>
+                }
+                <NewTableComponent OnClick="@AddTable"></NewTableComponent>
+            </div>
+        }
         <div class="poker-container">
             @if (Winner != null)
             {
-            <div class="winner-overlay">
-                The winner is @Winner.PokerUser.Username
-                @if (@Winner.Result != null)
-                {
-                <div>
-                    <br />
-                    With @Winner.Result.Hand.ToString() - @Winner.Result.Values.FirstOrDefault().ToString()
+                <div class="winner-overlay">
+                    The winner is @Winner.PokerUser.Username
+                    @if (@Winner.Result != null)
+                    {
+                        <div>
+                            <br />
+                            With @Winner.Result.Hand.ToString() - @Winner.Result.Values.FirstOrDefault().ToString()
+                        </div>
+                    }
                 </div>
-                }
-            </div>
             }
             @if (SelectedTable == null)
             {
@@ -39,62 +43,71 @@
             }
             else
             {
-        <div class="poker-game-container">
+                <div class="poker-game-container">
 
-            @for (int i = 0; i < Players.Count; i++)
-            {
-                if (i < 2 || i == 5)
-                {
-                    <div class="@StyleMap[i]">
-                        <CardRowComponent Cards="Players[i].Username == PokerUser.Username ? ownCards : unknown"></CardRowComponent>
-                        <PlayerComponent Player="Players[i]" 
-                                         IsSelf="Players[i].Username == PokerUser?.Username"
-                                         IsActive="Players[i].Username == NextPlayer?.Username"></PlayerComponent>
-                    </div>
-                }
-                else
-                {
-                    <div class="@StyleMap[i]">
-                        <CardRowComponent Cards="Players[i].Username == PokerUser.Username ? ownCards : unknown"></CardRowComponent>
-                        <PlayerComponent Player="Players[i]"
-                                         IsSelf="Players[i].Username == PokerUser?.Username"
-                                         IsActive="Players[i].Username == NextPlayer?.Username"></PlayerComponent>
-                    </div>
-                }
-
-            }
-
-            <div class="poker-middle">
-                <CardRowComponent Cards="flop"></CardRowComponent>
-            </div>
-            <div class="poker-result noselect">
-                @*@Result()*@
-                @if (CurrentSessionGuid != null)
-                {
-                    <div class="poker-hud-container">
-                        <div class="progress">
-                            <div class="progress-bar progress-bar-striped bg-success justify-content-end @((!ProgressPercent.Color.Equals(default(Poker.Shared.Models.PokerModels.ProgressPercent)) ? ProgressPercent.Color : ""))" role="progressbar" aria-valuenow="@ProgressPercent.Percent" aria-valuemin="0" aria-valuemax="100" style="transform: rotate(180deg); width: @ProgressPercent.ToString()"></div>
-                        </div>
-                        <div class="poker-slider">
-                            <input class="poker-slider-range" type="range" min="@MinValue" max="@MaxValue" @bind="Balance" @bind:event="oninput" step="50">
-                            <div class="form-control poker-raise noselect">
-                                @Balance
+                    @for (int i = 0; i < Players.Count; i++)
+                    {
+                        var currentPlayer = Players[i];
+                        if (i < 2 || i == 5)
+                        {
+                            <div class="@StyleMap[i]">
+                                @if (currentPlayer.CurrentRaise > 0)
+                                {
+                                    <div>@currentPlayer.CurrentRaise</div>
+                                }
+                                <CardRowComponent Cards="currentPlayer.Username == PokerUser.Username ? ownCards : unknown"></CardRowComponent>
+                                <PlayerComponent Player="currentPlayer"
+                                                 IsSelf="currentPlayer.Username == PokerUser?.Username"
+                                                 IsActive="currentPlayer.Username == NextPlayer?.Username"></PlayerComponent>
                             </div>
-                        </div>
-                        <div class="poker-action-container">
-                            @foreach (var item in Enum.GetValues(typeof(Poker.Shared.Enums.UserActionType)))
-                            {
-                                <div class="poker-button noselect" @onclick="() => SendAction((Poker.Shared.Enums.UserActionType)item)">@item.ToString()</div>
-                            }
-                        </div>
+                        }
+                        else
+                        {
+                            <div class="@StyleMap[i]">
+                                <PlayerComponent Player="currentPlayer"
+                                                 IsSelf="currentPlayer.Username == PokerUser?.Username"
+                                                 IsActive="currentPlayer.Username == NextPlayer?.Username"></PlayerComponent>
+                                <CardRowComponent Cards="currentPlayer.Username == PokerUser.Username ? ownCards : unknown"></CardRowComponent>
+                                @if (currentPlayer.CurrentRaise > 0)
+                                {
+                                    <div>@currentPlayer.CurrentRaise</div>
+                                }
+                            </div>
+                        }
+
+                    }
+
+                    <div class="poker-middle">
+                        <CardRowComponent Cards="flop"></CardRowComponent>
                     </div>
-                }
-                @*<button @onclick="Start">Button</button>*@
-            </div>
-        </div>
+                    <div class="poker-result noselect">
+                        @if (CurrentSessionGuid != null)
+                        {
+                            <div class="poker-hud-container">
+                                <div class="progress">
+                                    <div class="progress-bar progress-bar-striped bg-success justify-content-end @((!ProgressPercent.Color.Equals(default(Poker.Shared.Models.PokerModels.ProgressPercent)) ? ProgressPercent.Color : ""))" role="progressbar" aria-valuenow="@ProgressPercent.Percent" aria-valuemin="0" aria-valuemax="100" style="transform: rotate(180deg); width: @ProgressPercent.ToString()"></div>
+                                </div>
+                                <div class="poker-slider">
+                                    <input class="poker-slider-range" type="range" min="@MinValue" max="@MaxValue" @bind="Balance" @bind:event="oninput" step="50">
+                                    <div class="form-control poker-raise noselect">
+                                        @Balance
+                                    </div>
+                                </div>
+                                <div class="poker-action-container">
+                                    <div class="poker-button noselect @(IsRaiseInProgess ? "poker-button-deactivated" : "")" @onclick="() => SendAction(Poker.Shared.Enums.UserActionType.Check)">@Poker.Shared.Enums.UserActionType.Check.ToString()</div>
+                                    <div class="poker-button noselect @(IsRaiseInProgess ? "" : "poker-button-deactivated")" @onclick="() => SendAction(Poker.Shared.Enums.UserActionType.Call)">@Poker.Shared.Enums.UserActionType.Call.ToString()</div>
+                                    <div class="poker-button noselect" @onclick="() => SendAction(Poker.Shared.Enums.UserActionType.Raise)">@Poker.Shared.Enums.UserActionType.Raise.ToString()</div>
+                                    <div class="poker-button noselect" @onclick="() => SendAction(Poker.Shared.Enums.UserActionType.AllIn)">@Poker.Shared.Enums.UserActionType.AllIn.ToString()</div>
+                                    <div class="poker-button noselect" @onclick="() => SendAction(Poker.Shared.Enums.UserActionType.Fold)">@Poker.Shared.Enums.UserActionType.Fold.ToString()</div>
+
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
             }
 
         </div>
-        
+
     </div>
 </div>

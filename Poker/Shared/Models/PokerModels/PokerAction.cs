@@ -16,10 +16,12 @@ namespace Poker.Shared.Models.PokerModels
         public int RoundTypeIntValue { get; set; }
         public int PokerActionTypeIntValue { get; set; }
         public int TableId { get; set; }
+        public int CurrentRaise { get; set; }
         public PokerUser NextPlayer { get; set; }
         public Winner Winner { get; set; }
         public List<PokerUserWithCards> Targets { get; set; }
         public List<Card> Cards { get; set; }
+        public Player PlayerWithRaise { get; set; }
 
         public PokerAction()
         {
