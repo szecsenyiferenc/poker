@@ -5,8 +5,10 @@ using Poker.Server.Managers;
 using Poker.Server.Providers;
 using Poker.Server.Proxies;
 using Poker.Server.Services;
+using Poker.Shared;
 using Poker.Shared.Models.DomainModels;
 using Poker.Shared.Models.PokerModels;
+using Poker.Shared.Proxies;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -21,9 +23,9 @@ namespace Poker.Server.Hubs
         private DatabaseService _databaseService;
         private TableProvider _tableProvider;
         private PokerUserProvider _pokerUserProvider;
-        private EventProxy _eventProxy;
+        private IEventProxy _eventProxy;
         private TableManager _tableManager;
-        private HubEventEmitter _hubEventEmitter;
+        private IHubEventEmitter _hubEventEmitter;
 
         List<string> ids = new List<string>();
 
@@ -31,9 +33,9 @@ namespace Poker.Server.Hubs
             DatabaseService databaseService,
             TableProvider tableProvider,
             PokerUserProvider pokerUserProvider,
-            EventProxy eventProxy,
+            IEventProxy eventProxy,
             TableManager tableManager,
-            HubEventEmitter hubEventEmitter)
+            IHubEventEmitter hubEventEmitter)
         {
             _databaseService = databaseService;
             _tableProvider = tableProvider;
@@ -41,18 +43,9 @@ namespace Poker.Server.Hubs
             _eventProxy = eventProxy;
             _tableManager = tableManager;
             _hubEventEmitter = hubEventEmitter;
+
+
         }
-
-        // Server functions
-        //public async Task GetUsers()
-        //{
-        //    await Clients.All.SendAsync("Users", _pokerUserProvider.GetAllUsers());
-        //}
-
-        //public async Task GetTables()
-        //{
-        //    await Clients.All.SendAsync("Users", _pokerUserProvider.GetAllUsers());
-        //}
 
 
 
@@ -61,6 +54,14 @@ namespace Poker.Server.Hubs
             await Clients.Caller.SendAsync("GetTables", _tableProvider.GetAllTableViews());
         }
 
+        public async Task SendUserAction(UserAction userAction)
+        {
+            var pokerUser = _pokerUserProvider.GetUser(userAction.PokerUser);
+            var currentTable = _tableProvider.GetCurrentTable(pokerUser);
+            await currentTable.Next(userAction);
+        }
+
+        #region Table actions
 
         public async Task AddTable()
         {
@@ -73,11 +74,6 @@ namespace Poker.Server.Hubs
             await Clients.Caller.SendAsync("GetTables", _tableProvider.GetAllTableViews());
         }
 
-        public void SendAnswer(string guid, PokerAction value)
-        {
-            _hubEventEmitter.SetAnswer(guid, value);
-        }
-
         public async Task JoinToTable(int tableId, PokerUser rawPokerUser)
         {
             var pokerUser = _pokerUserProvider.GetUser(rawPokerUser);
@@ -85,32 +81,30 @@ namespace Poker.Server.Hubs
             await Groups.AddToGroupAsync(Context.ConnectionId, tableId.ToString());
             await Clients.All.SendAsync("GetTables", _tableProvider.GetAllTableViews());
 
-            await Task.Delay(3000);
-
             var currentTable = _tableProvider.GetCurrentTable(tableId);
             await Clients.Group(tableId.ToString()).SendAsync("PlayerStatus", currentTable.PokerUsers);
 
-            if (currentTable.PokerUsers.Count >= 2)
+            await Task.Delay(5000);
+
+            if (currentTable.PokerUsers.Count >= 2 && !currentTable.IsRunning)
             {
-                _eventProxy.GameStarted(currentTable);
+                await currentTable.Start();
             }
         }
 
         public async Task LeaveTable(int tableId, PokerUser rawPokerUser)
         {
             var pokerUser = _pokerUserProvider.GetUser(rawPokerUser);
+            if(pokerUser == null)
+            {
+                return;
+            }
             _tableProvider.LeaveTable(tableId, pokerUser);
             await Groups.RemoveFromGroupAsync(Context.ConnectionId, tableId.ToString());
             await Clients.All.SendAsync("GetTables", _tableProvider.GetAllTableViews());
         }
 
-        protected override void Dispose(bool disposing)
-        {
-            base.Dispose(disposing);
-        }
-
-
-
+        #endregion
 
         #region ConnectionFunctions
 
@@ -146,7 +140,6 @@ namespace Poker.Server.Hubs
         }
 
         #endregion
-
 
         #region Private functions
         // private methods 

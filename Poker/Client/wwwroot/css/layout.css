@@ -88,6 +88,7 @@
 
 .poker-container {
     background-color: green;
+    position: relative;
     width: 100%;
     display: flex;
     flex-flow: row nowrap;
@@ -149,9 +150,9 @@
                                     supported by Chrome, Edge, Opera and Firefox */
 }
 
- @media only screen and (max-width: 960px) {
+/* @media only screen and (max-width: 960px) {
     .table-container{
         display: none;
     }
-} 
+} */
  

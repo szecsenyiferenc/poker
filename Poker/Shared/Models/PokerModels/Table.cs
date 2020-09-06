@@ -1,28 +1,49 @@
-﻿using Poker.Shared.Models.DomainModels;
+﻿using Poker.Shared.Enums;
+using Poker.Shared.Models.DomainModels;
+using Poker.Shared.Providers;
+using Poker.Shared.Proxies;
 using System;
 using System.Collections.Generic;
-using System.Text;
+using System.Security.Cryptography;
+using System.Threading;
 using System.Threading.Tasks;
+using System.Timers;
+using Timer = System.Timers.Timer;
 
 namespace Poker.Shared.Models.PokerModels
 {
-    public class Table
+    public class Table : IDisposable
     {
         public List<PokerUser> PokerUsers { get; private set; }
         public Game Game { get; private set; }
+        public IHubEventEmitter HubEventEmitter { get; private set; }
+        public IEventProxy EventProxy { get; private set; }
+        public ISynchronizationContextProvider SynchronizationContextProvider { get; private set; }
 
         public int Id { get; set; }
         public int PlayerNumber { get => PokerUsers.Count; }
         public int MaxNumber { get; set; }
         public string Name { get; set; }
-        public bool IsRunning { get; set; }
+        public bool IsRunning { get => Game != null; }
 
-        public Table(int id, string name)
+        private Timer _gameTimer;
+
+        public Table(ISynchronizationContextProvider synchronizationContextProvider,
+            IHubEventEmitter hubEventEmitter, 
+            IEventProxy eventProxy,
+            int id, 
+            string name)
         {
             Id = id;
             Name = name;
             PokerUsers = new List<PokerUser>();
             MaxNumber = 6;
+            HubEventEmitter = hubEventEmitter;
+            SynchronizationContextProvider = synchronizationContextProvider;
+            EventProxy = eventProxy;
+
+            //_gameTimer = new Timer();
+            //_gameTimer.Elapsed += StartGame;
         }
 
         public bool AddPlayer(PokerUser player)
@@ -42,14 +63,52 @@ namespace Poker.Shared.Models.PokerModels
             return true;
         }
 
-        public async Task Next(IHubEventEmitter hubEventEmitter)
+        private async void StartGame(object source, EventArgs e)
         {
-            IsRunning = true;
-            Game = new Game(PokerUsers);
-            await Game.Next(hubEventEmitter, this);
-            IsRunning = false;
-            Console.WriteLine("Win");
+            try
+            {
+                // SynchronizationContextProvider.SetContextIfNeccessary();
+                await Start();
+            }
+            catch (Exception exc)
+            {
+                Console.WriteLine(exc.Message);
+            }
         }
 
+        public async Task Start()
+        {
+            Game = new Game(this);
+            await Game.Start();
+        }
+
+        public void Stop()
+        {
+            Game = null;
+        }
+
+        public async Task Next(UserAction userAction = null)
+        {
+            var result = await Game.Next(userAction);
+            if (result != null)
+            {
+                var sendCardsToAll = new PokerAction(RoundType.End, Id, null, PokerActionType.RoundUpdate);
+                sendCardsToAll.Winner = result;
+
+                await HubEventEmitter.SendPokerAction(sendCardsToAll);
+
+                await Task.Delay(5000);
+                Game = new Game(this);
+                await Game.Start();
+            } 
+        }
+
+        public void Dispose()
+        {
+            //if (_gameTimer?.Enabled != null )
+            //{
+            //    _gameTimer.Elapsed -= StartGame;
+            //}
+        }
     }
 }

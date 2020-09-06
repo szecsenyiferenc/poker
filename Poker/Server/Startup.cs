@@ -11,6 +11,7 @@ using AutoMapper;
 using Poker.Shared.Models.DomainModels;
 using Poker.Shared.Models.DatabaseModels;
 using Poker.Server.ConfigurationExtensions;
+using System.Text.Json.Serialization;
 
 namespace Poker.Server
 {

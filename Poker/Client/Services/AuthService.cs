@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.SignalR.Client;
 using Poker.Shared.Models.DomainModels;
+using Poker.Shared.Models.PokerModels;
 using Poker.Shared.Utils;
 using System;
 using System.Collections.Generic;
@@ -57,6 +58,7 @@ namespace Poker.Client.Services
 
         private async Task StopHubConnection()
         {
+            Console.WriteLine("Disconnection...");
             await _hubConnection.DisposeAsync();
         }
 
@@ -64,6 +66,7 @@ namespace Poker.Client.Services
 
         public void Dispose()
         {
+            Console.WriteLine("Disconnection...");
             _hubConnection.DisposeAsync();
         }
 

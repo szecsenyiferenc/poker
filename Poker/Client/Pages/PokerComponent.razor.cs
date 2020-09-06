@@ -25,6 +25,7 @@ namespace Poker.Client.Pages
 
 
         public PokerUser PokerUser { get; set; }
+        public Winner Winner { get; set; }
         public TableViewModel SelectedTable { get; set; }
         public string CurrentSessionGuid { get; private set; }
         public ProgressPercent ProgressPercent { get; private set; }
@@ -73,6 +74,7 @@ namespace Poker.Client.Pages
             }
 
             var hubConnection = AuthService.HubConnection;
+            PokerUser = AuthService.PokerUser;
 
             hubConnection.On<List<TableViewModel>>("GetTables", (tables) =>
             {
@@ -127,12 +129,115 @@ namespace Poker.Client.Pages
                 StateHasChanged();
             });
 
+
+            hubConnection.On<PokerAction>("SendPokerAction", async pokerAction =>
+            {
+                Console.WriteLine("------------");
+
+                switch (pokerAction.RoundType)
+                {
+                    case RoundType.Start:
+                        await StartRound(pokerAction);
+                        break;
+                    case RoundType.Flop:
+                        await FlopRound(pokerAction);
+                        break;
+                    case RoundType.Turn:
+                        await TurnRound(pokerAction);
+                        break;
+                    case RoundType.River:
+                        await RiverRound(pokerAction);
+                        break;
+                }
+
+                if(pokerAction.Winner != null)
+                {
+                    Winner = pokerAction.Winner;
+                }
+
+                StateHasChanged();
+            });
+
             await hubConnection.SendAsync("GetUsers");
 
             await hubConnection.SendAsync("GetTables");
 
-            PokerUser = AuthService.PokerUser;
 
+        }
+
+        async Task StartRound(PokerAction pokerAction)
+        {
+            Console.WriteLine("StartRound");
+
+            if (pokerAction.PokerActionType == PokerActionType.StartingCards)
+            {
+                Console.WriteLine("StartRound - 1");
+                Console.WriteLine(pokerAction.Targets.First().Cards[0]);
+
+                ownCards = pokerAction.Targets.First().Cards;
+                flop = null;
+                Winner = null;
+            }
+            if (pokerAction.PokerActionType == PokerActionType.NextPlayer)
+            {
+                Console.WriteLine("StartRound - 2");
+
+                await UpdateUI(pokerAction);
+            }
+        }
+        async Task FlopRound(PokerAction pokerAction)
+        {
+            if (pokerAction.PokerActionType == PokerActionType.RoundUpdate)
+            {
+                Console.WriteLine("FlopRound - 1");
+                flop = pokerAction?.Cards;
+            }
+            if (pokerAction.PokerActionType == PokerActionType.NextPlayer)
+            {
+                Console.WriteLine("FlopRound - 2");
+                await UpdateUI(pokerAction);
+            }
+        }
+        async Task TurnRound(PokerAction pokerAction)
+        {
+            if (pokerAction.PokerActionType == PokerActionType.RoundUpdate)
+            {
+                Console.WriteLine("TurnRound - 1");
+                flop.Add(pokerAction?.Cards.First());
+            }
+            if (pokerAction.PokerActionType == PokerActionType.NextPlayer)
+            {
+                Console.WriteLine("TurnRound - 2");
+                await UpdateUI(pokerAction);
+            }
+        }
+        async Task RiverRound(PokerAction pokerAction)
+        {
+            if (pokerAction.PokerActionType == PokerActionType.RoundUpdate)
+            {
+                Console.WriteLine("RiverRound - 1");
+                flop.Add(pokerAction?.Cards.First());
+            }
+            if (pokerAction.PokerActionType == PokerActionType.NextPlayer)
+            {
+                Console.WriteLine("RiverRound - 2");
+                await UpdateUI(pokerAction);
+            }
+        }
+
+        private async Task UpdateUI(PokerAction pokerAction)
+        {
+            if (pokerAction?.NextPlayer?.Username == PokerUser.Username)
+            {
+                Console.WriteLine("ENABLE");
+                CurrentSessionGuid = "1";
+            }
+            else
+            {
+                Console.WriteLine("DISABLE");
+                CurrentSessionGuid = null;
+            }
+            //await StartCount();
         }
 
         async Task AddTable()
@@ -158,9 +263,9 @@ namespace Poker.Client.Pages
             await AuthService.Logout();
         }
 
-        async Task SendAction(PokerActionType pokerActionType)
+        async Task SendAction(UserActionType userActionType)
         {
-            await AuthService.HubConnection.SendAsync("SendAnswer", CurrentSessionGuid, new PokerAction(pokerActionType));
+            await AuthService.HubConnection.SendAsync("SendUserAction", new UserAction(PokerUser, userActionType));
             CurrentSessionGuid = null;
         }
 
@@ -180,7 +285,7 @@ namespace Poker.Client.Pages
 
                 ProgressPercent = new ProgressPercent(currentValue / gap * 100);
 
-                await Task.Delay(25);
+                await Task.Delay(200);
                 StateHasChanged();
             }
         }

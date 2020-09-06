@@ -1,7 +1,10 @@
 ﻿using AutoMapper;
+using Poker.Shared;
 using Poker.Shared.Models.DomainModels;
 using Poker.Shared.Models.PokerModels;
 using Poker.Shared.Models.ViewModels;
+using Poker.Shared.Providers;
+using Poker.Shared.Proxies;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,9 +16,19 @@ namespace Poker.Server.Providers
     {
         public List<Table> Tables { get; set; }
         private readonly Mapper _mapper;
-        public TableProvider(Mapper mapper)
+        private readonly IHubEventEmitter _hubEventEmitter;
+        private readonly IEventProxy _eventProxy;
+        private readonly ISynchronizationContextProvider _synchronizationContextProvider;
+
+        public TableProvider(Mapper mapper,
+            IHubEventEmitter hubEventEmitter,
+            IEventProxy eventProxy,
+            ISynchronizationContextProvider synchronizationContextProvider)
         {
             _mapper = mapper;
+            _hubEventEmitter = hubEventEmitter;
+            _eventProxy = eventProxy;
+            _synchronizationContextProvider = synchronizationContextProvider;
             Tables = CreateMockTables();
         }
 
@@ -24,7 +37,7 @@ namespace Poker.Server.Providers
             var tables = new List<Table>();
             for (int i = 0; i < 5; i++)
             {
-                tables.Add(new Table(i + 1, $"Table {i + 1}"));
+                tables.Add(new Table(_synchronizationContextProvider, _hubEventEmitter, _eventProxy, i + 1, $"Table {i + 1}"));
             }
             return tables;
         }
@@ -32,6 +45,11 @@ namespace Poker.Server.Providers
         public Table GetCurrentTable(int tableId)
         {
             return Tables.FirstOrDefault(t => t.Id == tableId);
+        }
+
+        public Table GetCurrentTable(PokerUser pokerUser)
+        {
+            return Tables.FirstOrDefault(t => t.PokerUsers.Any(t => t.Username == pokerUser.Username));
         }
 
         public List<TableViewModel> GetAllTableViews()
@@ -81,7 +99,7 @@ namespace Poker.Server.Providers
 
         public void IncrementTables() {
             var tableCount = Tables.Count;
-            var newTable = new Table(tableCount + 1, $"Table {tableCount + 1}");
+            var newTable = new Table(_synchronizationContextProvider, _hubEventEmitter, _eventProxy, tableCount + 1, $"Table {tableCount + 1}");
             Tables.Add(newTable);
         }
     }

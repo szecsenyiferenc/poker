@@ -4,10 +4,12 @@ using System.Text;
 
 namespace Poker.Shared.Enums
 {
-    public enum PokerActionType
+    public enum UserActionType
     {
-        StartingCards,
-        RoundUpdate,
-        NextPlayer
+        Check,
+        Call,
+        Raise,
+        AllIn,
+        Fold
     }
 }
