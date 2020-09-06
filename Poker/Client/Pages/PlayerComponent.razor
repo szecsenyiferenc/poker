@@ -1,0 +1,34 @@
+﻿@using Poker.Shared.Models.PokerModels 
+
+<div class="player-container noselect" style="@GetActiveStyle()">
+    <div class="player-image" style="background-image: url('./assets/default.png')"></div>
+    <div class="player-description">
+        <div class="player-name" style="@GetSelfStyle()">
+            @Player.Username
+        </div>
+        <div class="player-balance">
+            @Player.Balance
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public PokerUser Player { get; set; }
+
+    [Parameter]
+    public bool IsActive { get; set; }
+
+    [Parameter]
+    public bool IsSelf { get; set; }
+
+    public string GetActiveStyle()
+    {
+        return IsActive ? "background-color: yellow;" : "";
+    }
+
+    public string GetSelfStyle()
+    {
+        return IsSelf ? "background-color: black; color: white; border-color: white;" : "";
+    }
+}

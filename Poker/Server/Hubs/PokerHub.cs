@@ -82,7 +82,8 @@ namespace Poker.Server.Hubs
             await Clients.All.SendAsync("GetTables", _tableProvider.GetAllTableViews());
 
             var currentTable = _tableProvider.GetCurrentTable(tableId);
-            await Clients.Group(tableId.ToString()).SendAsync("PlayerStatus", currentTable.PokerUsers);
+            List<Player> players = currentTable.PokerUsers.Select(p => new Player(p)).ToList();
+            await Clients.Group(tableId.ToString()).SendAsync("PlayerStatus", players);
 
             await Task.Delay(5000);
 

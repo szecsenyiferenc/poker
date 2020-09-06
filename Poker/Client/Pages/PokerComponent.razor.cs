@@ -25,6 +25,7 @@ namespace Poker.Client.Pages
 
 
         public PokerUser PokerUser { get; set; }
+        public PokerUser NextPlayer { get; set; }
         public Winner Winner { get; set; }
         public TableViewModel SelectedTable { get; set; }
         public string CurrentSessionGuid { get; private set; }
@@ -32,9 +33,10 @@ namespace Poker.Client.Pages
         public int MinValue { get; private set; }
         public int MaxValue { get; private set; }
         public int Balance { get; private set; }
+
         public Dictionary<int, string> StyleMap { get; set; }
 
-        public List<PokerUser> Players { get; set; }
+        public List<Player> Players { get; set; }
 
         List<Card> flop = new List<Card>();
         List<Card> ownCards = new List<Card>();
@@ -50,7 +52,7 @@ namespace Poker.Client.Pages
             MaxValue = 2020;
             Balance = 200;
 
-            Players = new List<PokerUser>();
+            Players = new List<Player>();
 
             StyleMap = CreateStyleMap();
 
@@ -104,9 +106,11 @@ namespace Poker.Client.Pages
                 await StartCount();
             });
 
-            hubConnection.On<List<PokerUser>>("PlayerStatus", pokerPlayers =>
+            hubConnection.On<List<Player>>("PlayerStatus", pokerPlayers =>
             {
                 Console.WriteLine("PlayerStatus");
+                Console.WriteLine(pokerPlayers != null);
+                Console.WriteLine(pokerPlayers.FirstOrDefault());
                 Players = pokerPlayers;
                 StateHasChanged();
             });
@@ -227,6 +231,7 @@ namespace Poker.Client.Pages
 
         private async Task UpdateUI(PokerAction pokerAction)
         {
+            NextPlayer = pokerAction.NextPlayer;
             if (pokerAction?.NextPlayer?.Username == PokerUser.Username)
             {
                 Console.WriteLine("ENABLE");
@@ -295,12 +300,12 @@ namespace Poker.Client.Pages
         {
             Dictionary<int, string> dict = new Dictionary<int, string>();
 
-            dict.Add(0, "poker-bottom");
-            dict.Add(1, "poker-bottom-right");
-            dict.Add(2, "poker-top-right");
-            dict.Add(3, "poker-top");
-            dict.Add(4, "poker-top-left");
-            dict.Add(5, "poker-bottom-left");
+            dict.Add(0, "poker-bottom poker-bottom-rows");
+            dict.Add(1, "poker-bottom-right poker-bottom-rows");
+            dict.Add(2, "poker-top-right poker-top-rows");
+            dict.Add(3, "poker-top poker-top-rows");
+            dict.Add(4, "poker-top-left poker-top-rows");
+            dict.Add(5, "poker-bottom-left poker-bottom-rows");
 
             return dict;
         }
