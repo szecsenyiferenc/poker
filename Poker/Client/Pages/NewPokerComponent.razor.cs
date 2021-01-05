@@ -109,26 +109,12 @@ namespace Poker.Client.Pages
             //});
 
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-            hubConnection.On<GameViewModel>("SendPokerAction", async gameViewModel =>
-            {
-                Console.WriteLine("------------");
-                Console.WriteLine("GAMEVIEWMODEL");
-=======
+
             hubConnection.On<GameViewModel>("SendPokerAction", gameViewModel =>
             {
                 Console.WriteLine("------------");
                 Console.WriteLine("GAMEVIEWMODEL");
                 Console.WriteLine(gameViewModel);
->>>>>>> ba7cff5... WIP
-=======
-            hubConnection.On<GameViewModel>("SendPokerAction", gameViewModel =>
-            {
-                Console.WriteLine("------------");
-                Console.WriteLine("GAMEVIEWMODEL");
-                Console.WriteLine(gameViewModel);
->>>>>>> cd72d80 (WIP)
                 GameViewModel = gameViewModel;
                 StateHasChanged();
                 Console.WriteLine("------------");

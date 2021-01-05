@@ -47,28 +47,14 @@ namespace Poker.Server.Hubs
             //    default:
             //        await _hubContext.Clients.Group(pokerAction.TableId.ToString()).SendAsync("SendPokerAction", pokerAction);
             //        break;
-<<<<<<< HEAD
-            //}
-            
-                
-            
-=======
             //} 
->>>>>>> cd72d80 (WIP)
         }
 
         public async Task SendPokerAction(List<GameViewModel> gameViewModels)
         {
             foreach (var gameViewModel in gameViewModels)
             {
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
                 Console.WriteLine($"SendPokerAction - {gameViewModel.Player.Username}");
->>>>>>> ba7cff5... WIP
-=======
-                Console.WriteLine($"SendPokerAction - {gameViewModel.Player.Username}");
->>>>>>> cd72d80 (WIP)
                 await _hubContext.Clients.Client(gameViewModel.Player.ConnectionId).SendAsync("SendPokerAction", gameViewModel);
             }
         }

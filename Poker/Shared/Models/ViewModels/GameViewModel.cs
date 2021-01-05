@@ -3,14 +3,7 @@ using Poker.Shared.Models.DomainModels;
 using Poker.Shared.Models.PokerModels;
 using System;
 using System.Collections.Generic;
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
 using System.Linq;
->>>>>>> ba7cff5... WIP
-=======
-using System.Linq;
->>>>>>> cd72d80 (WIP)
 using System.Text;
 
 namespace Poker.Shared.Models.ViewModels
@@ -22,34 +15,18 @@ namespace Poker.Shared.Models.ViewModels
         public Player Player { get; set; }
         public int MaxRaiseValue { get; set; }
         public PokerUser NextPlayer { get; set; }
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
         public PokerUser CurrentPlayer { get; set; }
->>>>>>> ba7cff5... WIP
-=======
-        public PokerUser CurrentPlayer { get; set; }
->>>>>>> cd72d80 (WIP)
         public Winner Winner { get; set; }
         public string CurrentSessionGuid { get; private set; }
         public int MinValue { get; private set; }
         public int MaxValue { get; private set; }
         public int Balance { get => Player.Balance; }
         public int Pot { get; private set; }
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
-=======
->>>>>>> cd72d80 (WIP)
         public List<Card> MyCards { get; set; }
         public List<Card> CommonCards { get; set; }
         public Dictionary<string, List<Card>> OtherCards { get; set; }
 
         public bool IsMyTurn { get; set; }
-<<<<<<< HEAD
->>>>>>> ba7cff5... WIP
-=======
->>>>>>> cd72d80 (WIP)
 
 
         public List<Player> Players { get; set; }
@@ -58,11 +35,6 @@ namespace Poker.Shared.Models.ViewModels
         public List<Card> ownCards = new List<Card>();
         public List<Card> unknown = new List<Card>();
         public List<Card>[] hands = new List<Card>[6];
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
-=======
->>>>>>> cd72d80 (WIP)
 
         public override string ToString()
         {
@@ -75,9 +47,5 @@ namespace Poker.Shared.Models.ViewModels
                 $"Cards:[{OtherCards.Select((k) => $"{k.Key}: {k.Value.FirstOrDefault()}, {k.Value.LastOrDefault()}").Aggregate((a,v) => a += "," + v)}]";
         }
 
-<<<<<<< HEAD
->>>>>>> ba7cff5... WIP
-=======
->>>>>>> cd72d80 (WIP)
     }
 }
