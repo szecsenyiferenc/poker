@@ -38,7 +38,7 @@ namespace Poker.Client.Pages
         public int CurrentValue { get; set; }
         public int MinValue { get; private set; }
         public int MaxValue { get; private set; }
-        public int Balance { get; private set; }
+        public int Balance { get => PokerUser.Balance;  }
         public int Pot { get; private set; }
 
         public Dictionary<int, string> StyleMap { get; set; }
@@ -57,7 +57,6 @@ namespace Poker.Client.Pages
         {
             MinValue = 0;
             CurrentValue = 0;
-            Balance = 0;
             TablesEnabled = true;
             IsRaiseInProgess = false;
 
@@ -263,8 +262,8 @@ namespace Poker.Client.Pages
             NextPlayer = pokerAction.NextPlayer;
             if (pokerAction?.NextPlayer?.Username == PokerUser.Username)
             {
-                Balance = NextPlayer.Balance;
                 CurrentValue = MinValue;
+                PokerUser.Balance = NextPlayer.Balance;
                 Console.WriteLine("ENABLE");
                 CurrentSessionGuid = "1";
             }

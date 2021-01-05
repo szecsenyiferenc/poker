@@ -66,7 +66,7 @@ namespace Poker.Client.Services
 
         public void Dispose()
         {
-            Console.WriteLine("Disconnection...");
+            Console.WriteLine("Disposing....Disconnection...");
             _hubConnection.DisposeAsync();
         }
 

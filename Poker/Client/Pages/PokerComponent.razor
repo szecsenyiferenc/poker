@@ -77,13 +77,13 @@
 
                     }
 
-                <div class="poker-middle">
-                    <CardRowComponent Cards="flop"></CardRowComponent>
-                    @if (Pot != 0)
-                    {
-                        <div>Pot: @Pot</div>
-                    }
-                </div>
+                    <div class="poker-middle">
+                        <CardRowComponent Cards="flop"></CardRowComponent>
+                        @if (Pot != 0)
+                        {
+                            <div>Pot: @Pot</div>
+                        }
+                    </div>
                     <div class="poker-result noselect">
                         @if (CurrentSessionGuid != null)
                         {
