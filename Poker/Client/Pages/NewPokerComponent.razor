@@ -1,6 +1,7 @@
 ﻿@page "/"
 
 <div class="poker-root">
+
     <NavigationBarComponent PokerUser="@PokerUser" SettingsClick="@ChangeView" LogoutClick="@Logout"></NavigationBarComponent>
     <div class="main-container">
         @if (TablesEnabled)
@@ -22,15 +23,15 @@
             </div>
         }
         <div class="poker-container">
-            @if (Winner != null)
+            @if (GameViewModel?.Winner != null)
             {
                 <div class="winner-overlay">
-                    The winner is @Winner.PokerUser.Username
-                    @if (@Winner.Result != null)
+                    The winner is @GameViewModel.Winner.PokerUser.Username
+                    @if (@GameViewModel.Winner.Result != null)
                     {
                         <div>
                             <br />
-                            With @Winner.Result.Hand.ToString() - @Winner.Result.Values.FirstOrDefault().ToString()
+                            With @GameViewModel.Winner.Result.Hand.ToString() - @GameViewModel.Winner.Result.Values.FirstOrDefault().ToString()
                         </div>
                     }
                 </div>
@@ -44,55 +45,63 @@
             else
             {
                 <div class="poker-game-container">
-
-                    @for (int i = 0; i < Players.Count; i++)
+                    @if (GameViewModel != null)
                     {
-                        var currentPlayer = Players[i];
-                        if (i < 2 || i == 5)
+                        @for (int i = 0; i < GameViewModel.Players.Count; i++)
                         {
-                            <div class="@StyleMap[i]">
-                                @if (currentPlayer.CurrentRaise > 0)
-                                {
-                                    <div>@currentPlayer.CurrentRaise</div>
-                                }
-                                <CardRowComponent Cards="currentPlayer.Username == PokerUser.Username ? ownCards : unknown"></CardRowComponent>
-                                <PlayerComponent Player="currentPlayer"
-                                                 IsSelf="currentPlayer.Username == PokerUser?.Username"
-                                                 IsActive="currentPlayer.Username == NextPlayer?.Username"></PlayerComponent>
-                            </div>
+                            var currentPlayer = GameViewModel.Players[i];
+                            Console.WriteLine(currentPlayer);
+                            if (i < 2 || i == 5)
+                            {
+                                <div class="@StyleMap[i]">
+                                    @if (currentPlayer.CurrentRaise > 0)
+                                    {
+                                        <div>@currentPlayer.CurrentRaise</div>
+                                    }
+                                    <CardRowComponent Cards="currentPlayer.Username == PokerUser.Username ? GameViewModel.ownCards : GameViewModel.unknown"></CardRowComponent>
+                                    <PlayerComponent Player="currentPlayer"
+                                                     IsSelf="currentPlayer.Username == PokerUser?.Username"
+                                                     IsActive="currentPlayer.Username == GameViewModel.NextPlayer?.Username"></PlayerComponent>
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="@StyleMap[i]">
+                                    <PlayerComponent Player="currentPlayer"
+                                                     IsSelf="currentPlayer.Username == PokerUser?.Username"
+                                                     IsActive="currentPlayer.Username == GameViewModel.NextPlayer?.Username"></PlayerComponent>
+                                    <CardRowComponent Cards="currentPlayer.Username == PokerUser.Username ? GameViewModel.ownCards : GameViewModel.unknown"></CardRowComponent>
+                                    @if (currentPlayer.CurrentRaise > 0)
+                                    {
+                                        <div>@currentPlayer.CurrentRaise</div>
+                                    }
+                                </div>
+                            }
                         }
-                        else
-                        {
-                            <div class="@StyleMap[i]">
-                                <PlayerComponent Player="currentPlayer"
-                                                 IsSelf="currentPlayer.Username == PokerUser?.Username"
-                                                 IsActive="currentPlayer.Username == NextPlayer?.Username"></PlayerComponent>
-                                <CardRowComponent Cards="currentPlayer.Username == PokerUser.Username ? ownCards : unknown"></CardRowComponent>
-                                @if (currentPlayer.CurrentRaise > 0)
-                                {
-                                    <div>@currentPlayer.CurrentRaise</div>
-                                }
-                            </div>
-                        }
-
                     }
 
                     <div class="poker-middle">
-                        <CardRowComponent Cards="flop"></CardRowComponent>
-                        @if (Pot != 0)
+                        @if (GameViewModel != null)
                         {
-                            <div>Pot: @Pot</div>
+                            @if (GameViewModel.flop != null)
+                            {
+                                <CardRowComponent Cards="GameViewModel.flop"></CardRowComponent>
+                            }
+                            @if (GameViewModel.Pot != 0)
+                            {
+                                <div>Pot: @GameViewModel.Pot</div>
+                            }
                         }
                     </div>
                     <div class="poker-result noselect">
-                        @if (CurrentSessionGuid != null)
+                        @if (GameViewModel?.CurrentSessionGuid != null)
                         {
                             <div class="poker-hud-container">
                                 <div class="progress">
                                     <div class="progress-bar progress-bar-striped bg-success justify-content-end @((!ProgressPercent.Color.Equals(default(Poker.Shared.Models.PokerModels.ProgressPercent)) ? ProgressPercent.Color : ""))" role="progressbar" aria-valuenow="@ProgressPercent.Percent" aria-valuemin="0" aria-valuemax="100" style="transform: rotate(180deg); width: @ProgressPercent.ToString()"></div>
                                 </div>
                                 <div class="poker-slider">
-                                    <input class="poker-slider-range" type="range" min="@MinValue" max="@Balance" @bind="CurrentValue" @bind:event="oninput" step="10">
+                                    <input class="poker-slider-range" type="range" min="@GameViewModel.MinValue" max="@GameViewModel.Balance" @bind="CurrentValue" @bind:event="oninput" step="10">
                                     <div class="form-control poker-raise noselect">
                                         @CurrentValue
                                     </div>
@@ -110,8 +119,6 @@
                     </div>
                 </div>
             }
-
         </div>
-
     </div>
 </div>

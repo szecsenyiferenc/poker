@@ -3,7 +3,6 @@ using Poker.Shared;
 using Poker.Shared.Models.DomainModels;
 using Poker.Shared.Models.PokerModels;
 using Poker.Shared.Models.ViewModels;
-using Poker.Shared.Providers;
 using Poker.Shared.Proxies;
 using System;
 using System.Collections.Generic;
@@ -18,17 +17,14 @@ namespace Poker.Server.Providers
         private readonly Mapper _mapper;
         private readonly IHubEventEmitter _hubEventEmitter;
         private readonly IEventProxy _eventProxy;
-        private readonly ISynchronizationContextProvider _synchronizationContextProvider;
 
         public TableProvider(Mapper mapper,
             IHubEventEmitter hubEventEmitter,
-            IEventProxy eventProxy,
-            ISynchronizationContextProvider synchronizationContextProvider)
+            IEventProxy eventProxy)
         {
             _mapper = mapper;
             _hubEventEmitter = hubEventEmitter;
             _eventProxy = eventProxy;
-            _synchronizationContextProvider = synchronizationContextProvider;
             Tables = CreateMockTables();
         }
 
@@ -37,7 +33,7 @@ namespace Poker.Server.Providers
             var tables = new List<Table>();
             for (int i = 0; i < 5; i++)
             {
-                tables.Add(new Table(_synchronizationContextProvider, _hubEventEmitter, _eventProxy, i + 1, $"Table {i + 1}"));
+                tables.Add(new Table(_hubEventEmitter, _eventProxy, i + 1, $"Table {i + 1}"));
             }
             return tables;
         }
@@ -99,7 +95,7 @@ namespace Poker.Server.Providers
 
         public void IncrementTables() {
             var tableCount = Tables.Count;
-            var newTable = new Table(_synchronizationContextProvider, _hubEventEmitter, _eventProxy, tableCount + 1, $"Table {tableCount + 1}");
+            var newTable = new Table(_hubEventEmitter, _eventProxy, tableCount + 1, $"Table {tableCount + 1}");
             Tables.Add(newTable);
         }
     }

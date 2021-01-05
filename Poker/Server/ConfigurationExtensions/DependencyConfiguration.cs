@@ -12,7 +12,6 @@ using Poker.Shared.Models.DatabaseModels;
 using Poker.Shared.Models.DomainModels;
 using Poker.Shared.Models.PokerModels;
 using Poker.Shared.Models.ViewModels;
-using Poker.Shared.Providers;
 using Poker.Shared.Proxies;
 using System;
 using System.Collections.Generic;
@@ -39,7 +38,6 @@ namespace Poker.Server.ConfigurationExtensions
             services.AddSingleton<IEventProxy, EventProxy>();
             services.AddSingleton<IHubEventEmitter, HubEventEmitter>();
             services.AddSingleton<TableManager>();
-            services.AddSingleton<ISynchronizationContextProvider, SynchronizationContextProvider>();
 
             services.AddTransient<DatabaseService>();
 

@@ -1,5 +1,6 @@
 ﻿using Poker.Shared.Models.DomainModels;
 using Poker.Shared.Models.PokerModels;
+using Poker.Shared.Models.ViewModels;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -15,5 +16,6 @@ namespace Poker.Shared
         //Task SendCards(PokerUser pokerUser, List<Card> cards);
         //Task SendWinner(Table table, string name);
         Task SendPokerAction(PokerAction pokerAction);
+        Task SendPokerAction(List<GameViewModel> gameViewModel);
     }
 }

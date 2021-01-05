@@ -3,7 +3,7 @@ using Poker.Shared;
 using Poker.Shared.Enums;
 using Poker.Shared.Models.DomainModels;
 using Poker.Shared.Models.PokerModels;
-using Poker.Shared.Providers;
+using Poker.Shared.Models.ViewModels;
 using Poker.Shared.Proxies;
 using System;
 using System.Collections.Concurrent;
@@ -17,15 +17,12 @@ namespace Poker.Server.Hubs
     {
         private IHubContext<PokerHub> _hubContext;
         private IEventProxy _eventProxy;
-        private ISynchronizationContextProvider _synchronizationContextProvider;
         private ConcurrentDictionary<string, object> _answers;
 
         public HubEventEmitter(IHubContext<PokerHub> hubContext, 
-            IEventProxy eventProxy, 
-            ISynchronizationContextProvider synchronizationContextProvider)
+            IEventProxy eventProxy)
         {
             _hubContext = hubContext;
-            _synchronizationContextProvider = synchronizationContextProvider;
             _answers = new ConcurrentDictionary<string, object>();
 
         }
@@ -59,5 +56,12 @@ namespace Poker.Server.Hubs
             
         }
 
+        public async Task SendPokerAction(List<GameViewModel> gameViewModels)
+        {
+            foreach (var gameViewModel in gameViewModels)
+            {
+                await _hubContext.Clients.Client(gameViewModel.Player.ConnectionId).SendAsync("SendPokerAction", gameViewModel);
+            }
+        }
     }
 }

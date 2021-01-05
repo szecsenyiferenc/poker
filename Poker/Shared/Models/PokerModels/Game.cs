@@ -1,6 +1,7 @@
 ﻿using Poker.Shared.Enums;
 using Poker.Shared.Managers;
 using Poker.Shared.Models.PokerModels;
+using Poker.Shared.Models.ViewModels;
 using Poker.Shared.Proxies;
 using System;
 using System.Collections.Generic;
@@ -51,21 +52,32 @@ namespace Poker.Shared.Models.DomainModels
             {
                 _deck = new Deck();
                 _deck.Shuffle();
-                var pokerUsersWithCards = new List<PokerUserWithCards>();
+
+                var gameViewModels = new List<GameViewModel>();
 
                 foreach (var pokerUser in Players)
                 {
-                    _cards[pokerUser] = _deck.GetCards(2);
-                    pokerUsersWithCards.Add(new PokerUserWithCards()
+                    var currentCards = _deck.GetCards(2);
+                    _cards[pokerUser] = currentCards;
+                    var gameViewModel = new GameViewModel()
                     {
-                        PokerUser = pokerUser,
-                        Cards = _cards[pokerUser]
-                    });
+                        RoundType = RoundType.Start,
+                        TableId = Table.Id,
+                        Player = pokerUser,
+                        ownCards = currentCards,
+                        unknown = new List<Card>()
+                        {
+                            new UnknownCard(),
+                            new UnknownCard()
+                        },
+                        Players = Players
+                    };
+
                 }
 
-                var sendCardsToAll = new PokerAction(RoundType.Start, Table.Id, pokerUsersWithCards, PokerActionType.StartingCards);
+                //var sendCardsToAll = new PokerAction(RoundType.Start, Table.Id, pokerUsersWithCards, PokerActionType.StartingCards);
 
-                await HubEventEmitter.SendPokerAction(sendCardsToAll);
+                await HubEventEmitter.SendPokerAction(gameViewModels);
 
                 await Task.Delay(100);
 
@@ -94,7 +106,7 @@ namespace Poker.Shared.Models.DomainModels
 
                 if (nextRoundType == (int)RoundType.End)
                 {
-                    return GetWinner(_cards); ;
+                    return GetWinner(_cards);
                 }
 
                 Round = new Round(this, (RoundType)nextRoundType);

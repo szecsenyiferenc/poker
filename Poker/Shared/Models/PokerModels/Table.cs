@@ -1,6 +1,5 @@
 ﻿using Poker.Shared.Enums;
 using Poker.Shared.Models.DomainModels;
-using Poker.Shared.Providers;
 using Poker.Shared.Proxies;
 using System;
 using System.Collections.Generic;
@@ -18,7 +17,6 @@ namespace Poker.Shared.Models.PokerModels
         public Game Game { get; private set; }
         public IHubEventEmitter HubEventEmitter { get; private set; }
         public IEventProxy EventProxy { get; private set; }
-        public ISynchronizationContextProvider SynchronizationContextProvider { get; private set; }
 
         public int Id { get; set; }
         public int PlayerNumber { get => PokerUsers.Count; }
@@ -28,8 +26,7 @@ namespace Poker.Shared.Models.PokerModels
 
         private Timer _gameTimer;
 
-        public Table(ISynchronizationContextProvider synchronizationContextProvider,
-            IHubEventEmitter hubEventEmitter, 
+        public Table(IHubEventEmitter hubEventEmitter, 
             IEventProxy eventProxy,
             int id, 
             string name)
@@ -39,7 +36,6 @@ namespace Poker.Shared.Models.PokerModels
             PokerUsers = new List<PokerUser>();
             MaxNumber = 6;
             HubEventEmitter = hubEventEmitter;
-            SynchronizationContextProvider = synchronizationContextProvider;
             EventProxy = eventProxy;
 
             //_gameTimer = new Timer();
