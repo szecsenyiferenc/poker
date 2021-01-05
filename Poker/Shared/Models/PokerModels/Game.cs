@@ -58,28 +58,18 @@ namespace Poker.Shared.Models.DomainModels
                 _deck.Shuffle();
 
 <<<<<<< HEAD
+<<<<<<< HEAD
                 var gameViewModels = new List<GameViewModel>();
+=======
+                Winner = null;
+>>>>>>> cd72d80 (WIP)
 
                 foreach (var pokerUser in Players)
                 {
-                    var currentCards = _deck.GetCards(2);
-                    _cards[pokerUser] = currentCards;
-                    var gameViewModel = new GameViewModel()
-                    {
-                        RoundType = RoundType.Start,
-                        TableId = Table.Id,
-                        Player = pokerUser,
-                        ownCards = currentCards,
-                        unknown = new List<Card>()
-                        {
-                            new UnknownCard(),
-                            new UnknownCard()
-                        },
-                        Players = Players
-                    };
-
+                    _cards[pokerUser] = _deck.GetCards(2);
                 }
 
+<<<<<<< HEAD
                 //var sendCardsToAll = new PokerAction(RoundType.Start, Table.Id, pokerUsersWithCards, PokerActionType.StartingCards);
 =======
                 Winner = null;
@@ -89,11 +79,16 @@ namespace Poker.Shared.Models.DomainModels
                     _cards[pokerUser] = _deck.GetCards(2);
                 }
 
+=======
+>>>>>>> cd72d80 (WIP)
                 CurrentPlayer = Players[0];
                 StartingPlayer = CurrentPlayer;
 
                 var gameViewModels = CreateGameViewModels();
+<<<<<<< HEAD
 >>>>>>> ba7cff5... WIP
+=======
+>>>>>>> cd72d80 (WIP)
 
                 await HubEventEmitter.SendPokerAction(gameViewModels);
 
@@ -163,11 +158,16 @@ namespace Poker.Shared.Models.DomainModels
                 if (nextRoundType == (int)RoundType.End)
                 {
 <<<<<<< HEAD
+<<<<<<< HEAD
                     return GetWinner(_cards);
 =======
                     Winner = GetWinner(_cards);
                     return Winner;
 >>>>>>> ba7cff5... WIP
+=======
+                    Winner = GetWinner(_cards);
+                    return Winner;
+>>>>>>> cd72d80 (WIP)
                 }
 
                 Round = new Round(this, (RoundType)nextRoundType);

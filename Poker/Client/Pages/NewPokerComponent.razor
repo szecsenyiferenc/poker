@@ -50,10 +50,6 @@
                         @for (int i = 0; i < GameViewModel.Players.Count; i++)
                         {
                             var currentPlayer = GameViewModel.Players[i];
-<<<<<<< HEAD:Poker/Client/Pages/NewPokerComponent.razor
-                            Console.WriteLine(currentPlayer);
-=======
->>>>>>> ba7cff5... WIP:Poker/Client/Pages/PokerComponent.razor
                             if (i < 2 || i == 5)
                             {
                                 <div class="@StyleMap[i]">
@@ -61,11 +57,7 @@
                                     {
                                         <div>@currentPlayer.CurrentRaise</div>
                                     }
-<<<<<<< HEAD:Poker/Client/Pages/NewPokerComponent.razor
-                                    <CardRowComponent Cards="currentPlayer.Username == PokerUser.Username ? GameViewModel.ownCards : GameViewModel.unknown"></CardRowComponent>
-=======
                                     <CardRowComponent Cards="GameViewModel.OtherCards[currentPlayer?.Username] != null ? GameViewModel.OtherCards[currentPlayer?.Username] : null"></CardRowComponent>
->>>>>>> ba7cff5... WIP:Poker/Client/Pages/PokerComponent.razor
                                     <PlayerComponent Player="currentPlayer"
                                                      IsSelf="currentPlayer.Username == PokerUser?.Username"
                                                      IsActive="currentPlayer.Username == GameViewModel.NextPlayer?.Username"></PlayerComponent>
@@ -77,11 +69,8 @@
                                     <PlayerComponent Player="currentPlayer"
                                                      IsSelf="currentPlayer.Username == PokerUser?.Username"
                                                      IsActive="currentPlayer.Username == GameViewModel.NextPlayer?.Username"></PlayerComponent>
-<<<<<<< HEAD:Poker/Client/Pages/NewPokerComponent.razor
-                                    <CardRowComponent Cards="currentPlayer.Username == PokerUser.Username ? GameViewModel.ownCards : GameViewModel.unknown"></CardRowComponent>
-=======
+
                                     <CardRowComponent Cards="GameViewModel.OtherCards[currentPlayer?.Username] != null ? GameViewModel.OtherCards[currentPlayer?.Username] : null"></CardRowComponent>
->>>>>>> ba7cff5... WIP:Poker/Client/Pages/PokerComponent.razor
                                     @if (currentPlayer.CurrentRaise > 0)
                                     {
                                         <div>@currentPlayer.CurrentRaise</div>
@@ -94,15 +83,9 @@
                     <div class="poker-middle">
                         @if (GameViewModel != null)
                         {
-<<<<<<< HEAD:Poker/Client/Pages/NewPokerComponent.razor
-                            @if (GameViewModel.flop != null)
-                            {
-                                <CardRowComponent Cards="GameViewModel.flop"></CardRowComponent>
-=======
                             @if (GameViewModel.CommonCards != null)
                             {
                                 <CardRowComponent Cards="GameViewModel.CommonCards"></CardRowComponent>
->>>>>>> ba7cff5... WIP:Poker/Client/Pages/PokerComponent.razor
                             }
                             @if (GameViewModel.Pot != 0)
                             {
@@ -111,11 +94,7 @@
                         }
                     </div>
                     <div class="poker-result noselect">
-<<<<<<< HEAD:Poker/Client/Pages/NewPokerComponent.razor
-                        @if (GameViewModel?.CurrentSessionGuid != null)
-=======
                         @if (GameViewModel != null && GameViewModel.IsMyTurn)
->>>>>>> ba7cff5... WIP:Poker/Client/Pages/PokerComponent.razor
                         {
                             <div class="poker-hud-container">
                                 <div class="progress">
@@ -133,7 +112,6 @@
                                     <div class="poker-button noselect @(IsRaise ? "" : "poker-button-deactivated")" @onclick="() => SendAction(Poker.Shared.Enums.UserActionType.Raise)">@Poker.Shared.Enums.UserActionType.Raise.ToString()</div>
                                     <div class="poker-button noselect" @onclick="() => SendAction(Poker.Shared.Enums.UserActionType.AllIn)">@Poker.Shared.Enums.UserActionType.AllIn.ToString()</div>
                                     <div class="poker-button noselect" @onclick="() => SendAction(Poker.Shared.Enums.UserActionType.Fold)">@Poker.Shared.Enums.UserActionType.Fold.ToString()</div>
-
                                 </div>
                             </div>
                         }
