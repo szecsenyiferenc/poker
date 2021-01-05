@@ -9,6 +9,7 @@ namespace Poker.Shared.Models.DomainModels
     {
         public CardColor CardColor { get; set; }
         public CardType CardType { get; set; }
+        public bool IsUnknown { get; set; }
 
         public Card()
         {
@@ -46,7 +47,7 @@ namespace Poker.Shared.Models.DomainModels
     {
         public UnknownCard()
         {
-
+            IsUnknown = true;
         }
 
         public override string ToString()

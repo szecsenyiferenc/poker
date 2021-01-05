@@ -60,10 +60,7 @@ namespace Poker.Server.Hubs
         {
             foreach (var gameViewModel in gameViewModels)
             {
-<<<<<<< HEAD
-=======
                 Console.WriteLine($"SendPokerAction - {gameViewModel.Player.Username}");
->>>>>>> ba7cff5... WIP
                 await _hubContext.Clients.Client(gameViewModel.Player.ConnectionId).SendAsync("SendPokerAction", gameViewModel);
             }
         }

@@ -12,6 +12,15 @@ namespace Poker.Client.Pages
         [Parameter]
         public Card Card { get; set; }
 
-        public string ImageUrl { get => $"assets/cards/{Card.ToString()}.png"; }
+        public string ImageUrl { get
+            {
+                if (Card.IsUnknown)
+                {
+                    return $"assets/cards/Unknown.png";
+                }
+
+                return $"assets/cards/{Card.ToString()}.png";
+            }
+        }
     }
 }

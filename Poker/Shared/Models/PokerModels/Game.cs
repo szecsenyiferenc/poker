@@ -17,11 +17,14 @@ namespace Poker.Shared.Models.DomainModels
         private int _turnState;
 
         public List<Player> Players { get; private set; }
+        public Player CurrentPlayer { get; set; }
+        public Player StartingPlayer { get; set; }
         public Round Round { get; private set; }
         public IHubEventEmitter HubEventEmitter { get; private set; }
         public IEventProxy EventProxy { get; private set; }
         public Table Table { get; private set; }
         public int Pot { get; set; }
+        public Winner Winner { get; set; }
 
         private Dictionary<PokerUser, List<Card>> _cards;
         private List<Card> _commonCards;
@@ -48,11 +51,13 @@ namespace Poker.Shared.Models.DomainModels
 
         public async Task Start()
         {
+
             if (Round == null)
             {
                 _deck = new Deck();
                 _deck.Shuffle();
 
+<<<<<<< HEAD
                 var gameViewModels = new List<GameViewModel>();
 
                 foreach (var pokerUser in Players)
@@ -76,6 +81,19 @@ namespace Poker.Shared.Models.DomainModels
                 }
 
                 //var sendCardsToAll = new PokerAction(RoundType.Start, Table.Id, pokerUsersWithCards, PokerActionType.StartingCards);
+=======
+                Winner = null;
+
+                foreach (var pokerUser in Players)
+                {
+                    _cards[pokerUser] = _deck.GetCards(2);
+                }
+
+                CurrentPlayer = Players[0];
+                StartingPlayer = CurrentPlayer;
+
+                var gameViewModels = CreateGameViewModels();
+>>>>>>> ba7cff5... WIP
 
                 await HubEventEmitter.SendPokerAction(gameViewModels);
 
@@ -85,6 +103,43 @@ namespace Poker.Shared.Models.DomainModels
 
                 await Round.Next();
             }
+        }
+
+        public List<GameViewModel> CreateGameViewModels()
+        {
+            var gameViewModels = new List<GameViewModel>();
+
+            foreach (var pokerUser in Players)
+            {
+                var gmvm = new GameViewModel()
+                {
+                    RoundType = Round != null ? Round.RoundType : RoundType.Start,
+                    TableId = Table.Id,
+                    CurrentPlayer = CurrentPlayer,
+                    Player = pokerUser,
+                    MyCards = _cards[pokerUser],
+                    OtherCards = Players.ToDictionary(p => p.Username, k => new List<Card>() { new UnknownCard(), new UnknownCard() }),
+                    CommonCards = _commonCards,
+                    Players = Players,
+                    IsMyTurn = CurrentPlayer == pokerUser,
+                    Winner = Winner
+                };
+
+                if (pokerUser.IsActive)
+                {
+                    gmvm.OtherCards[pokerUser.Username] = gmvm.MyCards;
+                }
+
+                if(Winner != null)
+                {
+                    CurrentPlayer = null;
+                    gmvm.OtherCards = Players.ToDictionary(p => p.Username, k => _cards[k]);
+                }
+
+                gameViewModels.Add(gmvm); 
+            }
+
+            return gameViewModels;
         }
 
         public async Task<Winner> Next(UserAction userAction = null)
@@ -101,12 +156,18 @@ namespace Poker.Shared.Models.DomainModels
                 if(currentPlayerNumber == 1)
                 {
                     var player = Players.FirstOrDefault(p => p.IsActive);
-                    return new Winner(player, null);
+                    Winner = new Winner(player, null);
+                    return Winner;
                 }
 
                 if (nextRoundType == (int)RoundType.End)
                 {
+<<<<<<< HEAD
                     return GetWinner(_cards);
+=======
+                    Winner = GetWinner(_cards);
+                    return Winner;
+>>>>>>> ba7cff5... WIP
                 }
 
                 Round = new Round(this, (RoundType)nextRoundType);
@@ -126,10 +187,8 @@ namespace Poker.Shared.Models.DomainModels
                         break;
                 }
 
-                var sendCardsToAll = new PokerAction(Round.RoundType, Table.Id, null, PokerActionType.RoundUpdate);
-                sendCardsToAll.Cards = nextCards;
 
-                await HubEventEmitter.SendPokerAction(sendCardsToAll);
+                await HubEventEmitter.SendPokerAction(CreateGameViewModels());
 
                 await Task.Delay(100);
 

@@ -16,7 +16,6 @@ namespace Poker.Shared.Models.PokerModels
 
         private IHubEventEmitter _hubEventEmitter;
         private Game _game;
-        private int _currentPlayerIndex;
 
         private int currentRaise;
 
@@ -25,7 +24,8 @@ namespace Poker.Shared.Models.PokerModels
         {
             _game = game;
             _hubEventEmitter = _game.HubEventEmitter;
-            _currentPlayerIndex = 0;
+
+            _game.CurrentPlayer = _game.StartingPlayer;
 
             Players = game.Players;
             Players.ForEach(p => p.IsDone = false);
@@ -39,10 +39,11 @@ namespace Poker.Shared.Models.PokerModels
             Player nextPlayer = null;
             PokerAction sendRaiseStatus;
             int tempRaise;
+            var currentIndex = Players.IndexOf(_game.CurrentPlayer);
 
             if (userAction != null)
             {
-                var player = Players.Find(u => u.Username == userAction.PokerUser.Username);
+                var player = _game.CurrentPlayer;
                 switch (userAction.UserActionType)
                 {
                     case UserActionType.Fold:
@@ -99,6 +100,15 @@ namespace Poker.Shared.Models.PokerModels
                 }
 
                 player.IsDone = true;
+
+                if (currentIndex < Players.Count)
+                {
+                    currentIndex++;
+                }
+                else if (currentIndex == Players.Count)
+                {
+                    currentIndex = 0;
+                }
             }
 
 
@@ -115,17 +125,17 @@ namespace Poker.Shared.Models.PokerModels
             {
                 while (nextPlayer == null || !nextPlayer.IsActive)
                 {
-                    if (_currentPlayerIndex < Players.Count)
+                    if (currentIndex < Players.Count)
                     {
-                        nextPlayer = Players[_currentPlayerIndex];
+                        nextPlayer = Players[currentIndex];
                         if (!nextPlayer.IsActive)
                         {
-                            _currentPlayerIndex++;
+                            currentIndex++;
                         };
                     }
-                    else if (_currentPlayerIndex == Players.Count)
+                    else if (currentIndex == Players.Count)
                     {
-                        _currentPlayerIndex = 0;
+                        currentIndex = 0;
                     }
                     else
                     {
@@ -134,15 +144,10 @@ namespace Poker.Shared.Models.PokerModels
                 }
             }
 
-
-
-
             if (nextPlayer != null)
             {
-                var sendCardsToAll = new PokerAction(RoundType, _game.Table.Id, null, PokerActionType.NextPlayer);
-                sendCardsToAll.NextPlayer = nextPlayer;
-                await _hubEventEmitter.SendPokerAction(sendCardsToAll);
-                _currentPlayerIndex++;
+                _game.CurrentPlayer = nextPlayer;
+                await _hubEventEmitter.SendPokerAction(_game.CreateGameViewModels());
                 return false;
             }
 

@@ -63,7 +63,6 @@ namespace Poker.Shared.Models.PokerModels
         {
             try
             {
-                // SynchronizationContextProvider.SetContextIfNeccessary();
                 await Start();
             }
             catch (Exception exc)
@@ -88,12 +87,9 @@ namespace Poker.Shared.Models.PokerModels
             var result = await Game.Next(userAction);
             if (result != null)
             {
-                var sendCardsToAll = new PokerAction(RoundType.End, Id, null, PokerActionType.RoundUpdate);
-                sendCardsToAll.Winner = result;
                 result.PokerUser.Balance += Game.Pot;
 
-
-                await HubEventEmitter.SendPokerAction(sendCardsToAll);
+                await HubEventEmitter.SendPokerAction(Game.CreateGameViewModels());
 
                 await Task.Delay(5000);
                 Game = new Game(this);
