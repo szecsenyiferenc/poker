@@ -12,9 +12,9 @@ namespace Poker.Shared.Models.DomainModels
         public string ConnectionId { get; set; }
         public int Balance { get; set; }
 
-        public PokerUser()
-        {
-            Balance = 1000;
-        }
+        //public PokerUser()
+        //{
+        //    Balance = 1000;
+        //}
     }
 }

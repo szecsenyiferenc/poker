@@ -15,7 +15,6 @@ namespace Poker.Shared
         //Task SendStatus(Table table, RoundStatus roundStatus);
         //Task SendCards(PokerUser pokerUser, List<Card> cards);
         //Task SendWinner(Table table, string name);
-        Task SendPokerAction(PokerAction pokerAction);
-        Task SendPokerAction(List<GameViewModel> gameViewModel);
+        Task SendPokerAction(List<GameViewModel> gameViewModel, bool isGameNull = false);
     }
 }

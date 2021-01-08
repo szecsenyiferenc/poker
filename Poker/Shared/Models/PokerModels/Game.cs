@@ -16,6 +16,7 @@ namespace Poker.Shared.Models.DomainModels
     {
         private int _turnState;
 
+        public string Id { get; set; }
         public List<Player> Players { get; private set; }
         public Player CurrentPlayer { get; set; }
         public Player StartingPlayer { get; set; }
@@ -25,6 +26,16 @@ namespace Poker.Shared.Models.DomainModels
         public Table Table { get; private set; }
         public int Pot { get; set; }
         public Winner Winner { get; set; }
+        public bool IsRaiseInProgress { 
+            get {
+                if (Round != null && Round.CurrentRaise != 0)
+                {
+                    return true;
+                }
+
+                return false;
+            } 
+        }
 
         private Dictionary<PokerUser, List<Card>> _cards;
         private List<Card> _commonCards;
@@ -36,13 +47,15 @@ namespace Poker.Shared.Models.DomainModels
 
         public Game(Table table)
         {
+            Id = Guid.NewGuid().ToString();
+
             _turnState = 0;
             Table = table;
             _cards = new Dictionary<PokerUser, List<Card>>();
 
             HubEventEmitter = table.HubEventEmitter;
             EventProxy = table.EventProxy;
-            Players = table.PokerUsers.Select(p => new Player(p)).ToList();
+            Players = table.PokerUsers.Where(p => p.Balance > 0).Select(p => new Player(p)).ToList();
 
             //_gameTimer = new Timer();
             //_gameTimer.Interval = 5000;
@@ -51,9 +64,10 @@ namespace Poker.Shared.Models.DomainModels
 
         public async Task Start()
         {
-
             if (Round == null)
             {
+                Players.ForEach(p => p.IsInAllIn = false);
+
                 _deck = new Deck();
                 _deck.Shuffle();
 
@@ -63,7 +77,6 @@ namespace Poker.Shared.Models.DomainModels
                 {
                     _cards[pokerUser] = _deck.GetCards(2);
                 }
-
 
                 Winner = null;
 
@@ -88,7 +101,7 @@ namespace Poker.Shared.Models.DomainModels
             }
         }
 
-        public List<GameViewModel> CreateGameViewModels()
+        public List<GameViewModel> CreateGameViewModels(bool isEnd = false)
         {
             var gameViewModels = new List<GameViewModel>();
 
@@ -96,27 +109,59 @@ namespace Poker.Shared.Models.DomainModels
             {
                 var gmvm = new GameViewModel()
                 {
+                    GameId = Id,
+                    RoundId = Round != null ? Round.Id : null,
                     RoundType = Round != null ? Round.RoundType : RoundType.Start,
                     TableId = Table.Id,
                     CurrentPlayer = CurrentPlayer,
                     Player = pokerUser,
+                    MinValue = Round != null ? Round.CurrentRaise : 0,
                     MyCards = _cards[pokerUser],
                     OtherCards = Players.ToDictionary(p => p.Username, k => new List<Card>() { new UnknownCard(), new UnknownCard() }),
                     CommonCards = _commonCards,
                     Players = Players,
                     IsMyTurn = CurrentPlayer == pokerUser,
-                    Winner = Winner
+                    Pot = Pot,
+                    Winner = Winner,
+                    IsAllIn = Round?.AllIn != null,
+                    CurrentRaise = Round != null ? Round.CurrentRaise : 0,
+                    AllInValue = Round?.AllIn != null ? Round.AllIn.Value : 0,
+                    IsRaiseInProgess = IsRaiseInProgress
                 };
+
+                if (Round != null && Round.IsOpenRound)
+                {
+                    gmvm.OtherCards = Players.ToDictionary(p => p.Username, k => _cards[k]);
+                }
 
                 if (pokerUser.IsActive)
                 {
                     gmvm.OtherCards[pokerUser.Username] = gmvm.MyCards;
                 }
 
-                if(Winner != null)
+                if (Round != null && Round.CurrentRaise >= pokerUser.Balance)
+                {
+                    gmvm.MinValue = pokerUser.Balance;
+                }
+
+
+                if (Winner != null)
                 {
                     CurrentPlayer = null;
-                    gmvm.OtherCards = Players.ToDictionary(p => p.Username, k => _cards[k]);
+                    gmvm.CurrentPlayer = null;
+                    gmvm.IsMyTurn = false;
+                    if (Winner.IsEnd)
+                    {
+                        gmvm.OtherCards = Players.ToDictionary(p => p.Username, k => _cards[k]);
+                    } else
+                    {
+                        gmvm.OtherCards[pokerUser.Username] = gmvm.MyCards;
+                    }
+                }
+
+                if (isEnd && pokerUser.Balance == 0)
+                {
+                    gmvm.LeaveTable = true;
                 }
 
                 gameViewModels.Add(gmvm); 
@@ -127,6 +172,11 @@ namespace Poker.Shared.Models.DomainModels
 
         public async Task<Winner> Next(UserAction userAction = null)
         {
+            if(userAction.RoundId != Round.Id)
+            {
+                return null;
+            }
+
             var result = await Round.Next(userAction);
 
             if (result)
@@ -139,13 +189,12 @@ namespace Poker.Shared.Models.DomainModels
                 if(currentPlayerNumber == 1)
                 {
                     var player = Players.FirstOrDefault(p => p.IsActive);
-                    Winner = new Winner(player, null);
+                    Winner = new Winner(player, null, false);
                     return Winner;
                 }
 
                 if (nextRoundType == (int)RoundType.End)
                 {
-
                     Winner = GetWinner(_cards);
                     return Winner;
                 }
@@ -266,6 +315,7 @@ namespace Poker.Shared.Models.DomainModels
             var winner = results.OrderByDescending(a => a.Value).First();
             return new Winner(winner.Key, winner.Value);
         }
+
 
         public void Dispose()
         {

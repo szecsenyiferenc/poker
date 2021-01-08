@@ -7,7 +7,10 @@ using System.Security.Cryptography;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Timers;
+using System.Linq;
 using Timer = System.Timers.Timer;
+using Poker.Shared.Managers;
+using Poker.Shared.Models.ViewModels;
 
 namespace Poker.Shared.Models.PokerModels
 {
@@ -25,9 +28,11 @@ namespace Poker.Shared.Models.PokerModels
         public bool IsRunning { get => Game != null; }
 
         private Timer _gameTimer;
+        private readonly IBalanceManager _balanceManager;
 
         public Table(IHubEventEmitter hubEventEmitter, 
             IEventProxy eventProxy,
+            IBalanceManager balanceManager,
             int id, 
             string name)
         {
@@ -37,6 +42,7 @@ namespace Poker.Shared.Models.PokerModels
             MaxNumber = 6;
             HubEventEmitter = hubEventEmitter;
             EventProxy = eventProxy;
+            _balanceManager = balanceManager;
 
             //_gameTimer = new Timer();
             //_gameTimer.Elapsed += StartGame;
@@ -84,17 +90,52 @@ namespace Poker.Shared.Models.PokerModels
 
         public async Task Next(UserAction userAction = null)
         {
-            var result = await Game.Next(userAction);
-            if (result != null)
+            if(Game != null)
             {
-                result.PokerUser.Balance += Game.Pot;
+                if(userAction != null && userAction.GameId != Game.Id)
+                {
+                    return;
+                }
 
-                await HubEventEmitter.SendPokerAction(Game.CreateGameViewModels());
+                var result = await Game.Next(userAction);
+                if (result != null)
+                {
+                    result.PokerUser.Balance += Game.Pot;
+                    await UpdateBalance(result.PokerUser);
 
-                await Task.Delay(5000);
-                Game = new Game(this);
-                await Game.Start();
-            } 
+                    await HubEventEmitter.SendPokerAction(Game.CreateGameViewModels());
+
+                    PokerUsers = PokerUsers.Where(p => p.Balance != 0).ToList();
+
+                    await Task.Delay(2000);
+
+                    if(Game != null)
+                    {
+                        await HubEventEmitter.SendPokerAction(Game.CreateGameViewModels(true));
+
+                        if (PokerUsers.Count > 1)
+                        {
+                            await Task.Delay(2000);
+                            Game = new Game(this);
+                            await Game.Start();
+                        }
+                        else
+                        {
+                            await HubEventEmitter.SendPokerAction(Game.CreateGameViewModels(), true);
+                            Game = null;
+                        }
+                    }
+
+
+                }
+            }
+        }
+
+        public async Task UpdateBalance(PokerUser pokerUser)
+        {
+            var user = PokerUsers.FirstOrDefault(p => p.Username == pokerUser.Username);
+            user.Balance = pokerUser.Balance;
+            await _balanceManager.UpdateBalance(pokerUser);
         }
 
         public void Dispose()

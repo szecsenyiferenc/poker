@@ -20,11 +20,24 @@
     public bool IsActive { get; set; }
 
     [Parameter]
+    public bool IsWinner { get; set; }
+
+    [Parameter]
     public bool IsSelf { get; set; }
 
     public string GetActiveStyle()
     {
-        return IsActive ? "background-color: yellow; box-shadow:0 0 8px 8px yellow;" : "";
+        if (IsActive)
+        {
+            return "background-color: yellow; box-shadow:0 0 8px 8px yellow;";
+        }
+
+        if (IsWinner)
+        {
+            return "background-color: red; box-shadow:0 0 8px 8px red;";
+        }
+
+        return string.Empty;
     }
 
     public string GetSelfStyle()

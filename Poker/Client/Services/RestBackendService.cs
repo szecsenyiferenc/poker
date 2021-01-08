@@ -29,7 +29,6 @@ namespace Poker.Client.Services
             {
                 return null;
             }
-
         }
 
         public async Task Logout(LoggedInUser loggedInUser)

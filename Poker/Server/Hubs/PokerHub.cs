@@ -56,9 +56,15 @@ namespace Poker.Server.Hubs
 
         public async Task SendUserAction(UserAction userAction)
         {
-            var pokerUser = _pokerUserProvider.GetUser(userAction.PokerUser);
-            var currentTable = _tableProvider.GetCurrentTable(pokerUser);
-            await currentTable.Next(userAction);
+            if(userAction != null)
+            {
+                var pokerUser = _pokerUserProvider.GetUser(userAction.PokerUser);
+                var currentTable = _tableProvider.GetCurrentTable(pokerUser);
+                if(currentTable != null)
+                {
+                    await currentTable.Next(userAction);
+                }
+            }
         }
 
         #region Table actions

@@ -9,6 +9,7 @@ namespace Poker.Shared.Models.PokerModels
     {
         public bool IsActive { get; set; }
         public bool IsDone { get; set; }
+        public bool IsInAllIn { get; set; }
         public int CurrentRaise { get; set; }
         public List<Card> Cards { get; set; }
 

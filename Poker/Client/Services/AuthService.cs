@@ -47,6 +47,11 @@ namespace Poker.Client.Services
             _navigationManager.NavigateTo("/login");
         }
 
+        public async Task Refresh()
+        {
+
+        }
+
         private async Task StartHubConnection()
         {
             _hubConnection = new HubConnectionBuilder()

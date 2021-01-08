@@ -12,13 +12,15 @@ namespace Poker.Shared.Models.PokerModels
 
         }
 
-        public Winner(PokerUser pokerUser, Result result)
+        public Winner(PokerUser pokerUser, Result result, bool isEnd = true)
         {
             PokerUser = pokerUser;
             Result = result;
+            IsEnd = isEnd;
         }
 
         public PokerUser PokerUser { get; set; }
         public Result Result { get; set; }
+        public bool IsEnd { get; set; }
     }
 }

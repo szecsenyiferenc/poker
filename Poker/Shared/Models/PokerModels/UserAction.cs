@@ -10,6 +10,8 @@ namespace Poker.Shared.Models.PokerModels
     {
         public UserActionType UserActionType { get; set; }
         public PokerUser PokerUser { get; set; }
+        public string GameId { get; set; }
+        public string RoundId { get; set; }
 
         public int Value { get; set; }
 

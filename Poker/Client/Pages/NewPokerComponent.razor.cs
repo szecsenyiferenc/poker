@@ -27,12 +27,12 @@ namespace Poker.Client.Pages
         public GameViewModel GameViewModel { get; set; }
 
 
-        public bool IsRaiseInProgess { get; set; }
         public int MyRaiseValue { get; set; }
         public bool IsRaise { get => CurrentValue != GameViewModel.MinValue; }
         public ProgressPercent ProgressPercent { get; private set; }
         public int CurrentValue { get; set; }
 
+        bool cancel;
 
         public TableViewModel SelectedTable { get; set; }
         public bool TablesEnabled { get; set; }
@@ -43,7 +43,6 @@ namespace Poker.Client.Pages
         {
             CurrentValue = 0;
             TablesEnabled = true;
-            IsRaiseInProgess = false;
 
             StyleMap = CreateStyleMap();
         }
@@ -65,58 +64,43 @@ namespace Poker.Client.Pages
                 StateHasChanged();
             });
 
-            //hubConnection.On<string>("Test", (test) =>
-            //{
-            //    Console.WriteLine($"The Winner is... {test}");
-            //    StateHasChanged();
-            //});
-
-            //hubConnection.On("Fold", () =>
-            //{
-            //    Console.WriteLine("Fold");
-            //    StateHasChanged();
-            //});
-
-            //hubConnection.On<string, string>("SendMessageToUser", async (guid, text) =>
-            //{
-            //    Console.WriteLine("SendMessageToUser");
-            //    StateHasChanged();
-            //    await StartCount();
-            //});
-
-            //hubConnection.On<List<Player>>("PlayerStatus", pokerPlayers =>
-            //{
-            //    Console.WriteLine("PlayerStatus");
-            //    Console.WriteLine(pokerPlayers != null);
-            //    Console.WriteLine(pokerPlayers.FirstOrDefault());
-            //    StateHasChanged();
-            //});
-
-            //hubConnection.On<List<Card>>("SendCards", cards =>
-            //{
-            //    Console.WriteLine("SendCards");
-            //    StateHasChanged();
-            //});
-
-
-            //hubConnection.On<RoundStatus>("SendStatus", roundStatus =>
-            //{
-            //    Console.WriteLine("SendStatus");
-
-            //    var allCards = roundStatus.Flop;
-
-            //    StateHasChanged();
-            //});
-
-
-
-            hubConnection.On<GameViewModel>("SendPokerAction", gameViewModel =>
+            hubConnection.On<GameViewModel>("SendPokerAction", async gameViewModel =>
             {
                 Console.WriteLine("------------");
                 Console.WriteLine("GAMEVIEWMODEL");
                 Console.WriteLine(gameViewModel);
+
+                cancel = true;
+
                 GameViewModel = gameViewModel;
+
+                if (GameViewModel != null && GameViewModel.Player != null && GameViewModel.Player.IsInAllIn)
+                {
+                    await Task.Delay(250);
+                    await SendAction(Poker.Shared.Enums.UserActionType.Check);
+                }
+
+                if (GameViewModel != null)
+                {
+                    CurrentValue = GameViewModel.MinValue;
+                    PokerUser.Balance = GameViewModel.Balance;
+
+                    if (GameViewModel.LeaveTable)
+                    {
+                        Console.WriteLine("Leave table");
+                        await LeaveTable();
+                        StateHasChanged();
+                        return;
+                    }
+                }
+
                 StateHasChanged();
+
+                if (GameViewModel != null && GameViewModel.IsMyTurn)
+                {
+                    cancel = false;
+                    StartCount();
+                }
                 Console.WriteLine("------------");
             });
 
@@ -134,12 +118,19 @@ namespace Poker.Client.Pages
 
         async Task JoinToTable(TableViewModel tableViewModel)
         {
-            SelectedTable = tableViewModel;
-            await AuthService.HubConnection.SendAsync("JoinToTable", tableViewModel.Id, AuthService.PokerUser);
+            if(PokerUser.Balance > 0)
+            {
+                SelectedTable = tableViewModel;
+                await AuthService.HubConnection.SendAsync("JoinToTable", tableViewModel.Id, AuthService.PokerUser);
+            }
         }
 
         async Task LeaveTable()
         {
+            if (GameViewModel != null && GameViewModel.IsMyTurn)
+            {
+                await SendAction(Poker.Shared.Enums.UserActionType.Fold);
+            }
             await AuthService.HubConnection.SendAsync("LeaveTable", SelectedTable.Id, AuthService.PokerUser);
             GameViewModel = null;
             SelectedTable = null;
@@ -163,7 +154,7 @@ namespace Poker.Client.Pages
                         MyRaiseValue = CurrentValue;
                         if (CurrentValue == GameViewModel.MinValue)
                         {
-                            if (IsRaiseInProgess)
+                            if (GameViewModel.IsRaiseInProgess)
                             {
                                 userAction = new UserAction(PokerUser, UserActionType.Call);
                             }
@@ -183,14 +174,14 @@ namespace Poker.Client.Pages
                     }
                     break;
                 case UserActionType.Call:
-                    if (!IsRaiseInProgess)
+                    if (!GameViewModel.IsRaiseInProgess)
                     {
                         return;
                     }
                     userAction = new UserAction(PokerUser, userActionType);
                     break;
                 case UserActionType.Check:
-                    if (IsRaiseInProgess)
+                    if (GameViewModel.IsRaiseInProgess)
                     {
                         return;
                     }
@@ -201,28 +192,51 @@ namespace Poker.Client.Pages
                     break;
             }
 
+            if(GameViewModel != null)
+            {
+                userAction.GameId = GameViewModel.GameId;
+                userAction.RoundId = GameViewModel.RoundId;
+            }
+
             await AuthService.HubConnection.SendAsync("SendUserAction", userAction);
         }
 
-        async Task StartCount()
+        async void StartCount()
         {
-            ProgressPercent = new ProgressPercent(0);
-            StateHasChanged();
-
-            var startDate = DateTime.Now;
-            var gap = TimeSpan.FromSeconds(14.5).TotalSeconds;
-
-            var currentValue = (DateTime.Now - startDate).TotalSeconds;
-
-            while (currentValue <= gap)
+            try
             {
-                currentValue = (DateTime.Now - startDate).TotalSeconds;
-
-                ProgressPercent = new ProgressPercent(currentValue / gap * 100);
-
-                await Task.Delay(200);
+                ProgressPercent = new ProgressPercent(0);
                 StateHasChanged();
+
+                var startDate = DateTime.Now;
+                var gap = TimeSpan.FromSeconds(14.5).TotalSeconds;
+
+                var currentValue = (DateTime.Now - startDate).TotalSeconds;
+
+                while (currentValue <= gap)
+                {
+                    if (cancel)
+                    {
+                        break;
+                    }
+                    currentValue = (DateTime.Now - startDate).TotalSeconds;
+
+                    ProgressPercent = new ProgressPercent(currentValue / gap * 100);
+
+                    await Task.Delay(200);
+                    StateHasChanged();
+                }
+
+                if (!cancel)
+                {
+                    await SendAction(Poker.Shared.Enums.UserActionType.Fold);
+                }
+            } catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+                Console.WriteLine(e.StackTrace);
             }
+
         }
 
         private Dictionary<int, string> CreateStyleMap()

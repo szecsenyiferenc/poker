@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Poker.Server.Services;
 using Poker.Shared;
 using Poker.Shared.Models.DomainModels;
 using Poker.Shared.Models.PokerModels;
@@ -15,14 +16,17 @@ namespace Poker.Server.Providers
     {
         public List<Table> Tables { get; set; }
         private readonly Mapper _mapper;
+        private readonly DatabaseService _databaseService;
         private readonly IHubEventEmitter _hubEventEmitter;
         private readonly IEventProxy _eventProxy;
 
         public TableProvider(Mapper mapper,
+            DatabaseService databaseService,
             IHubEventEmitter hubEventEmitter,
             IEventProxy eventProxy)
         {
             _mapper = mapper;
+            _databaseService = databaseService;
             _hubEventEmitter = hubEventEmitter;
             _eventProxy = eventProxy;
             Tables = CreateMockTables();
@@ -33,7 +37,7 @@ namespace Poker.Server.Providers
             var tables = new List<Table>();
             for (int i = 0; i < 5; i++)
             {
-                tables.Add(new Table(_hubEventEmitter, _eventProxy, i + 1, $"Table {i + 1}"));
+                tables.Add(new Table(_hubEventEmitter, _eventProxy, _databaseService, i + 1, $"Table {i + 1}"));
             }
             return tables;
         }
@@ -95,7 +99,7 @@ namespace Poker.Server.Providers
 
         public void IncrementTables() {
             var tableCount = Tables.Count;
-            var newTable = new Table(_hubEventEmitter, _eventProxy, tableCount + 1, $"Table {tableCount + 1}");
+            var newTable = new Table(_hubEventEmitter, _eventProxy, _databaseService, tableCount + 1, $"Table {tableCount + 1}");
             Tables.Add(newTable);
         }
     }

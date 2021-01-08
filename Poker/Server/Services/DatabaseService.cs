@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using Poker.Server.DatabaseContext;
+using Poker.Shared.Managers;
 using Poker.Shared.Models.DatabaseModels;
 using Poker.Shared.Models.DomainModels;
 using Poker.Shared.Utils;
@@ -11,7 +12,7 @@ using System.Threading.Tasks;
 
 namespace Poker.Server.Services
 {
-    public class DatabaseService
+    public class DatabaseService : IBalanceManager
     {
         private readonly ApplicationDbContext _context;
         private readonly Mapper _mapper;
@@ -54,22 +55,11 @@ namespace Poker.Server.Services
             }
         }
 
-        public async Task<PokerUser> GetUserFromBase64(string base64Auth)
+        public async Task UpdateBalance(PokerUser pokerUser)
         {
-            try
-            {
-                string rawString = base64Auth.Substring(6, base64Auth.Length - 6);
-                string rawLoginData = StringUtils.Base64Decode(rawString);
-                string[] loginDataArray = rawLoginData.Split(':');
-
-                LoginData loginData = new LoginData(loginDataArray[0], loginDataArray[1]);
-
-                return await GetUser(loginData);
-            }
-            catch (Exception e)
-            {
-                return null;
-            }
+            var currentUserModel = await _context.PokerUsers.FirstOrDefaultAsync(p => p.Username == pokerUser.Username);
+            currentUserModel.Balance = pokerUser.Balance;
+            await _context.SaveChangesAsync();
         }
     }
 }

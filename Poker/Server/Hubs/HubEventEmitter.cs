@@ -27,35 +27,19 @@ namespace Poker.Server.Hubs
 
         }
 
-        public async Task SendPokerAction(PokerAction pokerAction)
-        {
-            //switch (pokerAction.PokerActionType)
-            //{
-            //    case PokerActionType.StartingCards:
-            //        foreach (var target in pokerAction.Targets)
-            //        {
-            //            var newTargets = new List<PokerUserWithCards>()
-            //            {
-            //                target
-            //            };
-
-            //            var newPokerAction = new PokerAction(pokerAction.RoundType,
-            //                pokerAction.TableId, newTargets, PokerActionType.StartingCards);
-            //            await _hubContext.Clients.Client(target.PokerUser.ConnectionId).SendAsync("SendPokerAction", newPokerAction);
-            //        }
-            //        break;
-            //    default:
-            //        await _hubContext.Clients.Group(pokerAction.TableId.ToString()).SendAsync("SendPokerAction", pokerAction);
-            //        break;
-            //} 
-        }
-
-        public async Task SendPokerAction(List<GameViewModel> gameViewModels)
+        public async Task SendPokerAction(List<GameViewModel> gameViewModels, bool isGameNull = false)
         {
             foreach (var gameViewModel in gameViewModels)
             {
                 Console.WriteLine($"SendPokerAction - {gameViewModel.Player.Username}");
-                await _hubContext.Clients.Client(gameViewModel.Player.ConnectionId).SendAsync("SendPokerAction", gameViewModel);
+                if (isGameNull)
+                {
+                    await _hubContext.Clients.Client(gameViewModel.Player.ConnectionId).SendAsync("SendPokerAction", null);
+                }
+                else
+                {
+                    await _hubContext.Clients.Client(gameViewModel.Player.ConnectionId).SendAsync("SendPokerAction", gameViewModel);
+                }
             }
         }
     }

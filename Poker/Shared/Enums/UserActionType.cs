@@ -10,6 +10,7 @@ namespace Poker.Shared.Enums
         Call,
         Raise,
         AllIn,
-        Fold
+        Fold,
+        Join
     }
 }
