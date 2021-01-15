@@ -31,7 +31,10 @@ namespace Poker.Server.Providers
 
         public void SetConnectionId(string id, string connectionId)
         {
-            _currentUsers[id].ConnectionId = connectionId;
+            if(_currentUsers.TryGetValue(id, out var pokerUser))
+            {
+                pokerUser.ConnectionId = connectionId;
+            }
         }
 
         public PokerUser GetUser(string id)
@@ -53,8 +56,10 @@ namespace Poker.Server.Providers
 
         public void Remove(string id)
         {
-            _currentUsers.TryRemove(id, out PokerUser pokerUser);
-            Console.WriteLine($"Logged out - {id} - {pokerUser.Username}");
+            if(_currentUsers.TryRemove(id, out PokerUser pokerUser))
+            {
+                Console.WriteLine($"Logged out - {id} - {pokerUser?.Username}");
+            }
         }
 
         public List<PokerUser> GetAllUsers()

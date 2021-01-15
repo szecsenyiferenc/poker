@@ -1,6 +1,6 @@
 ﻿<div class="navbar-container">
     <div class="noselect">
-        Logged in as @Username
+        Logged in as @Username, Balance: @Balance
     </div>
     <div class="navbar-button-container">
         <div class="poker-button noselect" @onclick="@SettingsClick">Change view</div>
@@ -19,6 +19,7 @@
     public EventCallback LogoutClick { get; set; }
 
     public string Username { get => PokerUser?.Username; }
+    public int Balance { get => PokerUser != null ? PokerUser.Balance : 0; }
 
     protected override void OnParametersSet()
     {
