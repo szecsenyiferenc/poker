@@ -24,7 +24,8 @@
             </div>
         </div>
         <button class="btn btn-lg btn-success btn-block" type="submit">Registration</button>
-        <p class="mt-5 mb-3 text-muted">&copy; 2017-2020</p>
+        <button class="btn btn-lg btn-success btn-block" type="button" @onclick="Back">Back</button>
+        <p class="mt-5 mb-3">&copy; Diplomamunka - Szécsényi Ferenc</p>
     </EditForm>
 </div>
 
@@ -45,6 +46,11 @@
         {
             NavigationManager.NavigateTo("/login");
         }
+    }
+
+    public async Task Back()
+    {
+         NavigationManager.NavigateTo("/login");
     }
 
 }

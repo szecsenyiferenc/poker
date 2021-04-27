@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Poker.Server.DatabaseContext;
 using Poker.Shared.Managers;
 using Poker.Shared.Models.DatabaseModels;
@@ -19,9 +20,9 @@ namespace Poker.Server.Services
         private readonly ApplicationDbContext _context;
         private readonly Mapper _mapper;
 
-        public DatabaseService(Mapper mapper)
+        public DatabaseService(Mapper mapper, IConfiguration configuration)
         {
-            _context = new ApplicationDbContext();
+            _context = new ApplicationDbContext(configuration.GetConnectionString("MicrosoftSql"));
             _mapper = mapper;
         }
 

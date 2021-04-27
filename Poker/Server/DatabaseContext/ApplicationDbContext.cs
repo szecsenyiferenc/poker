@@ -10,9 +10,15 @@ namespace Poker.Server.DatabaseContext
     public class ApplicationDbContext : DbContext
     {
         public DbSet<PokerUserModel> PokerUsers { get; set; }
+        private readonly string _connectionString;
 
         protected override void OnConfiguring(DbContextOptionsBuilder options)
-            => options.UseSqlServer("Server=DESKTOP-DFI3P6Q;Database=Poker;Trusted_Connection=True;");
+            => options.UseSqlServer(_connectionString);
+
+        public ApplicationDbContext(string connectionString)
+        {
+            _connectionString = connectionString;
+        }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

@@ -65,7 +65,5 @@ namespace Poker.Server
                 endpoints.MapFallbackToFile("index.html");
             });
         }
-
-        
     }
 }
